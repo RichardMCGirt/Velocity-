@@ -513,6 +513,52 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+function updateTotalMarginVariance() {
+    let total = 0;
+
+    // Get all selected radio buttons in each group
+    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+        total += parseFloat(radio.value) || 0; // Convert value to number & sum up
+    });
+
+    // Get selected tier
+    const selectedTier = document.querySelector('input[name="tierSelection"]:checked');
+
+    let minMargin, maxMargin;
+
+    if (selectedTier) {
+        // Get the label text for the selected tier
+        const tierLabel = selectedTier.nextSibling.textContent.trim(); 
+
+        if (tierLabel === "Tier 1 Base") {
+            minMargin = total - 2;
+            maxMargin = total + 2;
+        } else if (tierLabel === "Tier 2 Base") {
+            minMargin = total - 1;
+            maxMargin = total + 1;
+        } else if (tierLabel === "Tier 3 Base") {
+            minMargin = Math.max(0, total - 1); // Prevent negative margin
+            maxMargin = total + 2;
+        } else {
+            minMargin = total;
+            maxMargin = total;
+        }
+    } else {
+        minMargin = total;
+        maxMargin = total;
+    }
+
+    // Update the total input field with % symbol
+    document.getElementById('totalMarginVariance').value =
+        `Recommended Margin: ${total.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`;
+}
+
+// Attach event listeners to all radio buttons including tiers
+document.addEventListener('change', event => {
+    if (event.target.type === 'radio') {
+        updateTotalMarginVariance();
+    }
+});
 
 
 
