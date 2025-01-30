@@ -56,7 +56,7 @@ function populateVanirOffices(records) {
 
     let officeNames = records
         .map(record => record.fields[fieldName])
-        .filter(name => name) 
+        .filter(name => name && name !== "Test Branch") // Remove "Test Branch"
         .sort((a, b) => a.localeCompare(b)); 
 
     if (officeNames.length === 0) {
@@ -70,6 +70,7 @@ function populateVanirOffices(records) {
         });
     }
 }
+
 
 
 async function fetchAllClientNames() {

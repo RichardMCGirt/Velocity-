@@ -2,149 +2,190 @@
 body {
     font-family: Arial, sans-serif;
     display: flex;
-    flex-direction: column; /* Ensures H1 is on top and container is below */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
     margin: 0;
     background-color: #f4f4f4;
-    overflow: hidden; /* Prevents body scrolling */
-}
-
-/* H1 Title: Centered on Top */
-h1 {
+    overflow: hidden;
+    width: 100vw;
     text-align: center;
-    font-size: 28px;
-    color: #24346c;
-    margin-bottom: 20px;
 }
 
-/* Container: Scrollable & Centered */
+/* Title Styling */
+h3 {
+    text-align: center;
+    font-size: 24px; /* Slightly smaller to fit better */
+    color: #24346c;
+    margin-bottom: 10px;
+}
+
+/* Ensures select elements and dropdowns are centered */
+select {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+#text {
+    color: #006283;
+}
+
+/* Ensures all text and elements are aligned */
+h3, select, .checkbox-container, .total-margin-container, input {
+    width: 100%;
+    text-align: center;
+}
+
+/* Container: Ensuring it fits the viewport */
 .container {
     background: white;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 100%;
+    width: 90%;
     max-width: 700px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    max-height: 95vh; /* Limit height to allow scrolling */
-    overflow-y: auto; /* Enables vertical scrolling when needed */
-    scrollbar-width: thin; /* Thin scrollbar for Firefox */
-    scrollbar-color: #ccc #f4f4f4; /* Scrollbar color */
+    justify-content: center;
+    height: auto;
+    overflow: hidden;
 }
 
-/* Custom Scrollbar for Webkit Browsers */
-.container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.container::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 5px;
-}
-
-.container::-webkit-scrollbar-track {
-    background: #f4f4f4;
-}
-
-/* Adds spacing between each checkbox container */
-.checkbox-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 20px; /* Adds spacing between each checkbox group */
-}
-
-/* Select & Input Fields */
+/* Form Elements: Optimized for Small Spaces */
 select, input[type="text"] {
-    padding: 10px;
-    border-radius: 10px;
+    padding: 8px;
+    border-radius: 8px;
     border: 1px solid #ccc;
     background-color: #fff;
-    width: fit-content;
-    min-width: 150px;
+    width: 90%; /* Use available space without overflow */
+    max-width: 300px; /* Prevent from being too large */
 }
 
-/* Button Container - Space Between Buttons */
+/* Button Container */
 .button-container {
     display: flex;
-    flex-direction: row; /* Stack buttons vertically */
-    align-items: center;
-    gap: 15px; /* Adds space between buttons */
-    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px; /* Reduce space */
+    margin-top: 10px; /* Save space */
 }
 
-/* Add spacing between each radio button in the Material Used section */
+/* Custom Radio Button Styling */
+input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #24346c; /* Default border color */
+    border-radius: 50%;
+    outline: none;
+    position: relative;
+    cursor: pointer;
+    background-color: white; /* Default background */
+    transition: all 0.3s ease;
+}
+
+input[type="radio"]:checked {
+    border-color: #B42025; /* Change border color when checked */
+    background-color: #B42025; /* Fully fill the radio button */
+}
+
+/* Ensures radio button labels are centered */
+#tierCheckboxes label,
 #materialRadioButtons label,
 #projectRadioButtons label,
 #locationRadioButtons label,
-#projectSizeRadioButtons label,
-#tierCheckboxes label
- {
+#projectSizeRadioButtons label {
     display: flex;
     align-items: center;
-    gap: 10px; /* Adds spacing between radio button and text */
-    margin-bottom: 10px; /* Adds spacing between each label */
+    justify-content: center; /* Centers label and radio button */
+    gap: 8px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    width: 100%;
 }
 
-/* Hide Client Name dropdown initially */
-#clientNameContainer {
-    display: none; /* Keeps it hidden until user selects Vanir Office */
-}
 
-
-/* Input field: Left-align text while keeping it visually centered */
+/* Fix for margin input */
 .total-margin-container input {
-    padding: 8px !important;
-    font-size: 26px !important;
-    text-align: center !important; /* Keeps text left-aligned */
-    min-width: 6000px !important; /* Prevents input from shrinking too much */
-    border: none !important; /* Removes border */
-    outline: none !important; /* Removes focus outline */
-    background-color: transparent !important; /* Makes background transparent */
-    display: inline-block; /* Ensures inline behavior */
+    padding: 6px !important;
+    font-size: 18px !important;
+    text-align: center !important;
+    width: 90% !important;
+    max-width: 300px !important;
+    border: none !important;
+    outline: none !important;
+    background-color: transparent !important;
+    display: block;
 }
-
-
-
-
 
 /* Button Styling */
 button {
     background-color: #24346c;
     color: white;
     border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 16px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
     cursor: pointer;
-    width: fit-content; /* Ensures button size adjusts to content */
     text-align: center;
+    width: auto;
 }
 
 button:hover {
     background-color: #1b2954;
 }
 
-/* Responsive Behavior */
+/* Style for total margin container */
+.total-margin-container {
+    width: 100%; /* Makes sure it takes full width */
+    max-width: 900px; /* Prevents excessive stretching */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+/* Style for the input field */
+.total-margin-container input {
+    font-size: 26px !important; /* Bigger text */
+    font-weight: bold; /* Make text stand out */
+    text-align: center !important; /* Center align the text */
+    width: 100% !important; /* Takes full width */
+    max-width: 800px !important; /* Prevents excessive stretching */
+    padding: 15px !important; /* Increase padding for better visibility */
+    border: 2px solid #24346c !important; /* Add border for visibility */
+    border-radius: 10px !important; /* Slightly rounded corners */
+    outline: none !important;
+    background-color: white !important;
+    color: #B42025 !important; /* Text color matching theme */
+}
+
+
+/* Ensure Full Page Fits Without Scroll */
 @media screen and (max-width: 768px) {
     .container {
-        width: 90%;
-        max-height: 80vh; /* Increase height limit for smaller screens */
+        width: 95%;
+        height: 85vh; /* Adjust height to fit mobile screens */
+        max-height: 85vh;
+        overflow: hidden; /* Prevent scrolling */
     }
 
     select, input[type="text"] {
-        width: 100%; /* Make elements fit screen width on mobile */
+        width: 100%;
     }
 
     .button-container {
+        flex-direction: column;
         width: 100%;
     }
 }
