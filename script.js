@@ -248,7 +248,6 @@ if (!response.ok) {
 }
 
 const data = await response.json();
-console.log("Fetched Location Data:", data); // Log fetched data
 
 if (data.records.length === 0) {
     console.log("No locations found in Airtable.");
@@ -469,7 +468,6 @@ document.addEventListener("DOMContentLoaded", function () {
             // Ensure the container is available before showing
             if (totalMarginContainer) {
                 totalMarginContainer.style.display = "flex"; 
-                console.log("✅ Total Margin Container is now visible.");
             } else {
                 console.error("❌ Error: Total Margin Container not found when trying to show.");
             }
