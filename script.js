@@ -207,9 +207,15 @@ function materialRadioButtons(records) {
         return;
     }
 
+    // Create a div to center the radio buttons
+    const radioGroup = document.createElement('div');
+    radioGroup.classList.add('radio-group'); // Apply CSS for centering
+
     materialData.forEach(item => {
         console.log(`Creating radio button: ${item.displayName} (Value: ${item.value})`);
         const label = document.createElement('label');
+        label.classList.add('radio-label'); // Ensures label alignment
+
         const radio = document.createElement('input');
         radio.type = 'radio';
         radio.value = item.value; // Store Margin Variance as value
@@ -217,11 +223,14 @@ function materialRadioButtons(records) {
 
         label.appendChild(radio);
         label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Material Type
-        container.appendChild(label);
+        radioGroup.appendChild(label);
     });
+
+    container.appendChild(radioGroup);
 
     console.log("Material radio buttons populated successfully.");
 }
+
 
 
 async function fetchProjectType() {
