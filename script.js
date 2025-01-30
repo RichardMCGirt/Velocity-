@@ -6,6 +6,8 @@ const clientTableId = 'tblVpJCbIKpUqvnMg'; // Table for Client Name Dropdown
 const projectSizeTableId = 'tblxiSxZuDcp8HmME'; // Table for Project Size (Stores Margin Variance)
 const locationTableId = 'tblyDCOuu9IhypEW9'; // Table for Project Size (Stores Margin Variance)
 const projecttypeTableId = 'tblkgM96KX0j1jnYt'; // Table for Project Size (Stores Margin Variance)
+const materialTableId = 'tbllwD5cOKgjFFk3U'; // Table for Material (Stores Margin Variance)
+
 
 
 
@@ -32,7 +34,7 @@ async function fetchData() {
         fetchProjectSizes(); // Fetch Project Sizes when page loads
         fetchLocation(); // Fetch Project Sizes when page loads
         fetchProjectType(); // Fetch Project Type when page loads
-
+        fetchMaterial(); // Fetch Material
 
         document.getElementById('status').textContent = '';
 
@@ -140,6 +142,70 @@ async function fetchProjectSizes() {
     }
 }
 
+async function fetchMaterial() {
+    const url = `https://api.airtable.com/v0/${baseId}/${materialTableId}`;
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${airtableApiKey}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch project sizes');
+        }
+
+        const data = await response.json();
+        materialRadioButtons(data.records);
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById('projectSizeRadioButtons').innerHTML = '<p>Error loading project sizes</p>';
+    }
+}
+
+function materialRadioButtons(records) {
+    const container = document.getElementById('materialRadioButtons');
+    container.innerHTML = '';
+
+    let materialData = [];
+
+    records.forEach(record => {
+        // Ensure Material Type exists & Allow Margin Variance even if it's 0
+        if (record.fields['Material Type'] !== undefined && record.fields['Margin Variance'] !== undefined) {
+            materialData.push({
+                displayName: record.fields['Material Type'], 
+                value: record.fields['Margin Variance']
+            });
+        }
+    });
+
+    // Sort alphabetically
+    materialData.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    if (materialData.length === 0) {
+        container.innerHTML = '<p>No materials available</p>';
+        return;
+    }
+
+    materialData.forEach(item => {
+        console.log(`Creating radio button: ${item.displayName} (Value: ${item.value})`);
+        const label = document.createElement('label');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.value = item.value; // Store Margin Variance as value
+        radio.name = "materialSelection";
+
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Material Type
+        container.appendChild(label);
+    });
+
+    console.log("Material radio buttons populated successfully.");
+}
+
+
 async function fetchProjectType() {
     const url = `https://api.airtable.com/v0/${baseId}/${projecttypeTableId}`;
 
@@ -235,7 +301,7 @@ function populateLocationRadioButtons(records) {
     console.log("Location radio buttons populated successfully.");
 }
 
-function  populateProjecttypeRadioButtons(records) {
+function populateProjecttypeRadioButtons(records) {
     const container = document.getElementById('projectRadioButtons'); 
     container.innerHTML = '';
 
@@ -250,7 +316,12 @@ function  populateProjecttypeRadioButtons(records) {
         }
     });
 
-    projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName)); // Sort alphabetically
+    // Sort with "Single Family" always on top
+    projectSizeData.sort((a, b) => {
+        if (a.displayName === "Single Family") return -1; // Move "Single Family" to top
+        if (b.displayName === "Single Family") return 1;
+        return a.displayName.localeCompare(b.displayName); // Sort alphabetically
+    });
 
     if (projectSizeData.length === 0) {
         container.innerHTML = '<p>No Project Types available</p>';
@@ -258,19 +329,21 @@ function  populateProjecttypeRadioButtons(records) {
     }
 
     projectSizeData.forEach(item => {
+        console.log(`Creating radio button: ${item.displayName} (Value: ${item.value})`);
         const label = document.createElement('label');
         const radio = document.createElement('input');
         radio.type = 'radio';
         radio.value = item.value; // Store Margin Variance as value
-        radio.name = "locationSelection";
+        radio.name = "projectTypeSelection";
 
         label.appendChild(radio);
-        label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Location
+        label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Project Type
         container.appendChild(label);
     });
 
-    console.log("Location radio buttons populated successfully.");
+    console.log("Project Type radio buttons populated successfully.");
 }
+
 
 
 
