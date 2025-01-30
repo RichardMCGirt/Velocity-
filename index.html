@@ -1,50 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velocity</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 300px;
-        }
-        h1 {
-            color: #333;
-        }
-        select, .checkbox-container {
-            width: 100%;
-            text-align: left;
-            margin-top: 10px;
-        }
-        select {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .checkbox-container label {
-            display: block;
-            margin-top: 5px;
-        }
-        .loading {
-            font-size: 14px;
-            color: #888;
-        }
-    </style>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Velocity</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    
 <body>
 
     <div class="container">
@@ -74,6 +36,12 @@
             <div id="projectSizeRadioButtons">Loading...</div>
         </div>
 
+          <!-- Radio Buttons for Project Size (Stores Locations) -->
+          <div class="checkbox-container">
+            <h3>Location Selection:</h3>
+            <div id="locationRadioButtons">Loading...</div>
+        </div>
+
         <p id="status" class="loading"></p>
     </div>
 
@@ -84,6 +52,8 @@
         const vanirOfficeTableId = 'tbl9hEx6uvFWK8Wd8'; // Table for Vanir Office Dropdown
         const clientTableId = 'tblVpJCbIKpUqvnMg'; // Table for Client Name Dropdown
         const projectSizeTableId = 'tblxiSxZuDcp8HmME'; // Table for Project Size (Stores Margin Variance)
+        const locationTableId = 'tblyDCOuu9IhypEW9'; // Table for Project Size (Stores Margin Variance)
+
 
         const fieldName = 'Office Name'; 
         const tierFields = ['Tier 1 Base', 'Tier 2 Base', 'Tier 3 Base']; 
@@ -106,6 +76,8 @@
                 populateVanirOffices(data.records);
                 populateTierCheckboxes(data.records);
                 fetchProjectSizes(); // Fetch Project Sizes when page loads
+                fetchLocation(); // Fetch Project Sizes when page loads
+
 
                 document.getElementById('status').textContent = '';
 
@@ -212,6 +184,79 @@
                 document.getElementById('projectSizeRadioButtons').innerHTML = '<p>Error loading project sizes</p>';
             }
         }
+
+        async function fetchLocation() {
+    const url = `https://api.airtable.com/v0/${baseId}/${locationTableId}`;
+    console.log(`Fetching locations from: ${url}`); // Log API URL
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${airtableApiKey}`
+            }
+        });
+
+        console.log("Response Status:", response.status); // Log response status
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch location');
+        }
+
+        const data = await response.json();
+        console.log("Fetched Location Data:", data); // Log fetched data
+
+        if (data.records.length === 0) {
+            console.log("No locations found in Airtable.");
+        } else {
+            console.log(`Total locations retrieved: ${data.records.length}`);
+        }
+
+        populateLocationRadioButtons(data.records);
+
+    } catch (error) {
+        console.error("Error fetching locations:", error);
+        document.getElementById('locationRadioButtons').innerHTML = '<p>Error loading locations</p>';
+    }
+}
+
+
+        function populateLocationRadioButtons(records) {
+            const container = document.getElementById('locationRadioButtons'); 
+            container.innerHTML = '';
+
+            let projectSizeData = [];
+
+            records.forEach(record => {
+                if (record.fields['Distance'] !== undefined && record.fields['Margin Variance'] !== undefined) {
+                    projectSizeData.push({
+                        displayName: record.fields['Distance'], 
+                        value: record.fields['Margin Variance']
+                    });
+                }
+            });
+
+            projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName)); // Sort alphabetically
+
+            if (projectSizeData.length === 0) {
+                container.innerHTML = '<p>No location available</p>';
+                return;
+            }
+
+            projectSizeData.forEach(item => {
+                const label = document.createElement('label');
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.value = item.value; // Store Margin Variance as value
+                radio.name = "locationSelection";
+
+                label.appendChild(radio);
+                label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Location
+                container.appendChild(label);
+            });
+
+            console.log("Location radio buttons populated successfully.");
+        }
+
 
         function populateTierCheckboxes(records) {
             const checkboxContainer = document.getElementById('tierCheckboxes');
