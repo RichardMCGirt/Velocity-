@@ -8,12 +8,11 @@
     </head>
     
 <body>
-    <h1></h1>
 
     <div class="container">
 
         <!-- Vanir Office Dropdown -->
-        <label for="vanirOffice">Vanir Office:</label>
+        <h3>Vanir Office</h3>
         <select id="vanirOffice" onchange="fetchClientNames()">
             <option>Loading...</option>
         </select>
@@ -29,7 +28,7 @@
       
 
         <!-- Client Name Dropdown (Filtered by Vanir Office Selection) -->
-        <label for="clientName">Client Name:</label>
+        <h3>Client Name</h3>
         <select id="clientName">
             <option></option>
         </select>
@@ -38,7 +37,7 @@
 
         <!-- Radio Buttons for Project Size (Stores Margin Variance) -->
         <div class="checkbox-container">
-            <h3>Project Size:</h3>
+            <h3>Project Size</h3>
             <div id="projectSizeRadioButtons">Loading...</div>
         </div>
 
@@ -49,21 +48,22 @@
         </div>
 
         <div class="checkbox-container">
-            <h3>Project Type:</h3>
+            <h3>Project Type</h3>
             <div id="projectRadioButtons">Loading...</div>
         </div>
 
         <div class="checkbox-container">
-            <h3>Material Used:</h3>
+            <h3>Material Used</h3>
             <div id="materialRadioButtons">Loading...</div>
         </div>
 
         <br>
         <br>
 
-        <!-- Total Margin Variance -->
-        <label for="totalMarginVariance"><strong>Recommended Margin:</strong></label>
-        <input type="text" id="totalMarginVariance" readonly value="0">
+      <!-- Total Margin Variance (Aligned in One Line) -->
+<div class="total-margin-container">
+    <input type="text" id="totalMarginVariance" readonly value="0">
+</div>
 
 
 

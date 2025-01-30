@@ -438,8 +438,10 @@ function updateTotalMarginVariance() {
     });
 
     // Update the total input field with % symbol
-    document.getElementById('totalMarginVariance').value = total.toFixed(2) + "%"; // Keep 2 decimal places
+    document.getElementById('totalMarginVariance').value = "Recommended Margin: " + total.toFixed(2) + "%"; // Keep 2 decimal places
 }
+
+
 
 // Attach event listeners to all radio buttons
 document.addEventListener('change', event => {
@@ -448,6 +450,32 @@ document.addEventListener('change', event => {
     }
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const totalMarginContainer = document.querySelector(".total-margin-container");
+    
+    // Initially hide the container
+    if (totalMarginContainer) {
+        totalMarginContainer.style.display = "none";
+        console.log("✅ Total Margin Container is hidden initially.");
+    } else {
+        console.error("❌ Error: Total Margin Container not found!");
+    }
+
+    // Use event delegation to detect dynamically added radio buttons
+    document.body.addEventListener("change", function (event) {
+        if (event.target.type === "radio") {
+            console.log(`🔘 Radio button selected: ${event.target.value}`);
+
+            // Ensure the container is available before showing
+            if (totalMarginContainer) {
+                totalMarginContainer.style.display = "flex"; 
+                console.log("✅ Total Margin Container is now visible.");
+            } else {
+                console.error("❌ Error: Total Margin Container not found when trying to show.");
+            }
+        }
+    });
+});
 
 
 fetchData();
