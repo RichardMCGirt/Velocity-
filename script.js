@@ -436,8 +436,8 @@ function updateTotalMarginVariance() {
         total += parseFloat(radio.value) || 0; // Convert value to number & sum up
     });
 
-    // Update the total input field
-    document.getElementById('totalMarginVariance').value = total.toFixed(2); // Keep 2 decimal places
+    // Update the total input field with % symbol
+    document.getElementById('totalMarginVariance').value = total.toFixed(2) + "%"; // Keep 2 decimal places
 }
 
 // Attach event listeners to all radio buttons
@@ -446,6 +446,7 @@ document.addEventListener('change', event => {
         updateTotalMarginVariance();
     }
 });
+
 
 
 fetchData();
