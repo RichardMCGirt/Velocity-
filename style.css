@@ -54,9 +54,10 @@ h3, select, .checkbox-container, .total-margin-container, input {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: auto;
-    overflow: hidden;
+    justify-content: flex-start; /* Prevents elements from stretching */
+    height: 80vh; /* Limits height to allow scrolling */
+    overflow-y: auto; /* Enables vertical scrolling */
+    overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
 }
 
 /* Form Elements: Optimized for Small Spaces */
@@ -172,7 +173,7 @@ button:hover {
 
 /* Style for the input field */
 .total-margin-container input {
-    font-size: 26px !important; /* Bigger text */
+    font-size: 24px !important; /* Bigger text */
     font-weight: bold; /* Make text stand out */
     text-align: center !important; /* Center align the text */
     width: 100% !important; /* Takes full width */
@@ -186,27 +187,3 @@ button:hover {
 }
 
 
-/* Ensure Full Page Fits Without Scroll */
-@media screen and (max-width: 768px) {
-    .container {
-        width: 95%;
-        height: 85vh; /* Adjust height to fit mobile screens */
-        max-height: 85vh;
-        overflow: hidden; /* Prevent scrolling */
-    }
-
-    select, input[type="text"] {
-        width: 100%;
-    }
-
-    .button-container {
-        flex-direction: column;
-        width: 100%;
-    }
-}
-@media screen and (max-width: 768px) {
-    .radio-group {
-        flex-direction: column; /* Stack items on smaller screens */
-        align-items: flex-start;
-    }
-}
