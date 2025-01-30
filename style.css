@@ -101,7 +101,7 @@ input[type="radio"]:checked {
 
 
 
-/* Ensures all radio button sections are aligned */
+/* Slightly shift specific radio button sections to the right */
 #tierCheckboxes,
 #materialRadioButtons,
 #projectRadioButtons,
@@ -109,9 +109,11 @@ input[type="radio"]:checked {
 #projectSizeRadioButtons {
     display: flex;
     flex-direction: column; /* Keeps layout vertical */
-    align-items: flex-start; /* Aligns to the left */
-    width: 100%;
+    align-items: flex-start; /* Aligns content normally */
+    width: 50%; /* Maintain normal width */
+    padding-left: 42%; /* Move slightly to the right */
 }
+
 
 /* Ensure labels and radio buttons are aligned inline */
 #tierCheckboxes label,
