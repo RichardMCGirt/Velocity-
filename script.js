@@ -10,6 +10,15 @@ const materialTableId = 'tbllwD5cOKgjFFk3U'; // Table for Material (Stores Margi
 
 const fieldName = 'Office Name'; 
 const tierFields = ['Tier 1 Base', 'Tier 2 Base', 'Tier 3 Base']; 
+let allClients = []; // Global array to store client data
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetchAllClientNames(); // Load all client names on page load
+
+    const vanirOfficeDropdown = document.getElementById("vanirOffice");
+    vanirOfficeDropdown.addEventListener("change", fetchClientNames); // Fetch clients locally on selection
+});
+
 
 async function fetchData() {
     const url = `https://api.airtable.com/v0/${baseId}/${vanirOfficeTableId}`;
@@ -62,42 +71,49 @@ function populateVanirOffices(records) {
     }
 }
 
-async function fetchClientNames() {
-const selectedOffice = document.getElementById('vanirOffice').value;
-let allRecords = [];
-let offset = '';
 
-try {
-do {
-    const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}?offset=${offset}`;
-    const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${airtableApiKey}` }
-    });
+async function fetchAllClientNames() {
+    let offset = '';
+    try {
+        do {
+            const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}?offset=${offset}`;
+            const response = await fetch(url, {
+                headers: { Authorization: `Bearer ${airtableApiKey}` }
+            });
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch client names');
+            if (!response.ok) {
+                throw new Error('Failed to fetch client names');
+            }
+
+            const data = await response.json();
+            allClients = [...allClients, ...data.records]; // Store in global array
+
+            offset = data.offset || ''; // Continue fetching if there is an offset
+        } while (offset);
+
+        console.log(`✅ Loaded ${allClients.length} client names into memory.`);
+    } catch (error) {
+        console.error("❌ Error fetching clients:", error);
+    }
+}
+
+
+function fetchClientNames() {
+    const selectedOffice = document.getElementById('vanirOffice').value;
+    
+    if (!selectedOffice) {
+        document.getElementById('clientName').innerHTML = '<option>No office selected</option>';
+        return;
     }
 
-    const data = await response.json();
-    allRecords = [...allRecords, ...data.records];
+    // Filter clients based on selected Vanir Office
+    const filteredClients = allClients
+        .filter(record => record.fields.Division === selectedOffice)
+        .map(record => record.fields['Client Name']);
 
-    // If an offset exists, continue fetching
-    offset = data.offset || '';
+    populateClientDropdown(filteredClients);
+} 
 
-} while (offset); // Keep fetching until no offset exists
-
-// Filter only clients that match the selected Vanir Office
-const filteredClients = allRecords
-    .filter(record => record.fields.Division === selectedOffice)
-    .map(record => record.fields['Client Name']);
-
-populateClientDropdown(filteredClients);
-
-} catch (error) {
-console.error(error);
-document.getElementById('clientName').innerHTML = '<option>Error loading clients</option>';
-}
-}
 
 
 function populateClientDropdown(clientNames) {
@@ -240,8 +256,6 @@ const response = await fetch(url, {
         Authorization: `Bearer ${airtableApiKey}`
     }
 });
-
-console.log("Response Status:", response.status); // Log response status
 
 if (!response.ok) {
     throw new Error('Failed to fetch location');
