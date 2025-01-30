@@ -22,6 +22,15 @@
 
         <br>
 
+          <!-- Radio Buttons for Tier Selection -->
+          <div class="checkbox-container">
+            <h3>Tier Selection:</h3>
+            <div id="tierCheckboxes">Loading...</div>
+        </div>
+
+        <br>
+        <br>
+
         <!-- Client Name Dropdown (Filtered by Vanir Office Selection) -->
         <label for="clientName">Client Name:</label>
         <select id="clientName">
@@ -31,12 +40,6 @@
         <br>
         <br>
 
-        <!-- Radio Buttons for Tier Selection -->
-        <div class="checkbox-container">
-            <h3>Tier Selection:</h3>
-            <div id="tierCheckboxes">Loading...</div>
-        </div>
-
         <!-- Radio Buttons for Project Size (Stores Margin Variance) -->
         <div class="checkbox-container">
             <h3>Project Size:</h3>
@@ -45,7 +48,7 @@
 
           <!-- Radio Buttons for Project Size (Stores Locations) -->
           <div class="checkbox-container">
-            <h3>Location:</h3>
+            <h3>Location Distance:</h3>
             <div id="locationRadioButtons">Loading...</div>
         </div>
 
@@ -55,9 +58,18 @@
         </div>
 
         <div class="checkbox-container">
-            <h3>Material Type:</h3>
+            <h3>Material Used:</h3>
             <div id="materialRadioButtons">Loading...</div>
         </div>
+
+        <br>
+        <br>
+
+        <!-- Total Margin Variance -->
+        <label for="totalMarginVariance"><strong>Total Margin Variance:</strong></label>
+        <input type="text" id="totalMarginVariance" readonly value="0">
+
+
 
         <p id="status" class="loading"></p>
     </div>

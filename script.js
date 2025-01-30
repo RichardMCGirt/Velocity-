@@ -428,4 +428,24 @@ function populateProjectSizeRadioButtons(records) {
     console.log("Project Size radio buttons populated successfully.");
 }
 
+function updateTotalMarginVariance() {
+    let total = 0;
+
+    // Get all selected radio buttons in each group
+    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+        total += parseFloat(radio.value) || 0; // Convert value to number & sum up
+    });
+
+    // Update the total input field
+    document.getElementById('totalMarginVariance').value = total.toFixed(2); // Keep 2 decimal places
+}
+
+// Attach event listeners to all radio buttons
+document.addEventListener('change', event => {
+    if (event.target.type === 'radio') {
+        updateTotalMarginVariance();
+    }
+});
+
+
 fetchData();
