@@ -8,9 +8,6 @@ const locationTableId = 'tblyDCOuu9IhypEW9'; // Table for Project Size (Stores M
 const projecttypeTableId = 'tblkgM96KX0j1jnYt'; // Table for Project Size (Stores Margin Variance)
 const materialTableId = 'tbllwD5cOKgjFFk3U'; // Table for Material (Stores Margin Variance)
 
-
-
-
 const fieldName = 'Office Name'; 
 const tierFields = ['Tier 1 Base', 'Tier 2 Base', 'Tier 3 Base']; 
 
@@ -110,6 +107,9 @@ function populateClientDropdown(clientNames) {
     if (clientNames.length === 0) {
         dropdown.innerHTML = '<option>No matching clients</option>';
     } else {
+        // Sort client names alphabetically (A-Z)
+        clientNames.sort((a, b) => a.localeCompare(b));
+
         clientNames.forEach(client => {
             const option = document.createElement('option');
             option.textContent = client;
@@ -118,6 +118,7 @@ function populateClientDropdown(clientNames) {
         });
     }
 }
+
 
 async function fetchProjectSizes() {
     const url = `https://api.airtable.com/v0/${baseId}/${projectSizeTableId}`;
