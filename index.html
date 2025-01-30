@@ -11,11 +11,11 @@
 
     <div class="container">
 
-        <!-- Vanir Office Dropdown -->
-        <h3>Vanir Office</h3>
-        <select id="vanirOffice" onchange="fetchClientNames()">
-            <option>Loading...</option>
-        </select>
+      <!-- Vanir Office Dropdown -->
+<h3>Vanir Office</h3>
+<select id="vanirOffice">
+    <option value="">Select an Office</option> <!-- Default empty option -->
+</select>
 
        
 
@@ -27,11 +27,13 @@
 
       
 
-        <!-- Client Name Dropdown (Filtered by Vanir Office Selection) -->
-        <h3>Client Name</h3>
-        <select id="clientName">
-            <option></option>
-        </select>
+     <!-- Client Name Dropdown (Initially Hidden) -->
+<div id="clientNameContainer">
+    <h3>Client Name</h3>
+    <select id="clientName">
+        <option></option>
+    </select>
+</div>
 
        
 

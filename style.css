@@ -94,6 +94,10 @@ select, input[type="text"] {
     margin-bottom: 10px; /* Adds spacing between each label */
 }
 
+/* Hide Client Name dropdown initially */
+#clientNameContainer {
+    display: none; /* Keeps it hidden until user selects Vanir Office */
+}
 
 
 /* Input field: Left-align text while keeping it visually centered */

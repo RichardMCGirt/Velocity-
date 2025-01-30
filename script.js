@@ -477,5 +477,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const clientNameContainer = document.getElementById("clientNameContainer");
+    const vanirOfficeDropdown = document.getElementById("vanirOffice");
+
+    // Initially hide the Client Name section
+    if (clientNameContainer) {
+        clientNameContainer.style.display = "none";
+        console.log("✅ Client Name dropdown is initially hidden.");
+    } else {
+        console.error("❌ Error: Client Name container not found!");
+    }
+
+    // Show Client Name dropdown & Fetch Client Names when Vanir Office is selected
+    vanirOfficeDropdown.addEventListener("change", function () {
+        if (vanirOfficeDropdown.value) {
+            clientNameContainer.style.display = "block"; // Show the section
+            console.log("✅ Client Name dropdown is now visible.");
+            fetchClientNames(); // ✅ Call fetchClientNames() to populate the dropdown
+        } else {
+            clientNameContainer.style.display = "none"; // Hide dropdown if nothing is selected
+        }
+    });
+});
+
+
+
 
 fetchData();
