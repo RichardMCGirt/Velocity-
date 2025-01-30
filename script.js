@@ -7,6 +7,7 @@ const projectSizeTableId = 'tblxiSxZuDcp8HmME'; // Table for Project Size (Store
 const locationTableId = 'tblyDCOuu9IhypEW9'; // Table for Project Size (Stores Margin Variance)
 const projecttypeTableId = 'tblkgM96KX0j1jnYt'; // Table for Project Size (Stores Margin Variance)
 const materialTableId = 'tbllwD5cOKgjFFk3U'; // Table for Material (Stores Margin Variance)
+let projectSizeData = [];
 
 const fieldName = 'Office Name'; 
 const tierFields = ['Tier 1 Base', 'Tier 2 Base', 'Tier 3 Base']; 
@@ -179,7 +180,7 @@ async function fetchMaterial() {
 
     } catch (error) {
         console.error(error);
-        document.getElementById('projectSizeRadioButtons').innerHTML = '<p>Error loading project sizes</p>';
+        document.getElementById('materialsRadioButtons').innerHTML = '<p>Error loading materials</p>';
     }
 }
 
@@ -291,8 +292,6 @@ document.getElementById('locationRadioButtons').innerHTML = '<p>Error loading lo
 function populateLocationRadioButtons(records) {
     const container = document.getElementById('locationRadioButtons'); 
     container.innerHTML = '';
-
-    let projectSizeData = [];
 
     records.forEach(record => {
         if (record.fields['Distance'] !== undefined && record.fields['Margin Variance'] !== undefined) {
@@ -430,15 +429,26 @@ function populateProjectSizeRadioButtons(records) {
         }
     });
 
-    projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName)); // Sort alphabetically
+    // Sort numerically by the number before the hyphen
+    projectSizeData.sort((a, b) => {
+        const numA = parseInt(a.displayName.split('-')[0].trim(), 10) || 0;
+        const numB = parseInt(b.displayName.split('-')[0].trim(), 10) || 0;
+        return numA - numB; // Numeric comparison
+    });
 
     if (projectSizeData.length === 0) {
         container.innerHTML = '<p>No project sizes available</p>';
         return;
     }
 
+    // Create a flex container for alignment
+    const radioGroup = document.createElement('div');
+    radioGroup.classList.add('radio-group'); // Ensures proper styling
+
     projectSizeData.forEach(item => {
         const label = document.createElement('label');
+        label.classList.add('radio-label'); // Styling class
+
         const radio = document.createElement('input');
         radio.type = 'radio';
         radio.value = item.value; // Store Margin Variance as value
@@ -446,11 +456,14 @@ function populateProjectSizeRadioButtons(records) {
 
         label.appendChild(radio);
         label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Project Size
-        container.appendChild(label);
+        radioGroup.appendChild(label);
     });
+
+    container.appendChild(radioGroup);
 
     console.log("Project Size radio buttons populated successfully.");
 }
+
 
 function updateTotalMarginVariance() {
     let total = 0;
