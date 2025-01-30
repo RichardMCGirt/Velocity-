@@ -62,10 +62,16 @@
             <option>Select a Vanir Office first</option>
         </select>
 
-        <!-- Checkboxes for Tier Selection -->
+        <!-- Radio Buttons for Tier Selection -->
         <div class="checkbox-container">
             <h3>Tier Selection:</h3>
             <div id="tierCheckboxes">Loading...</div>
+        </div>
+
+        <!-- Radio Buttons for Project Size (Stores Margin Variance) -->
+        <div class="checkbox-container">
+            <h3>Project Size Selection:</h3>
+            <div id="projectSizeRadioButtons">Loading...</div>
         </div>
 
         <p id="status" class="loading"></p>
@@ -77,6 +83,8 @@
 
         const vanirOfficeTableId = 'tbl9hEx6uvFWK8Wd8'; // Table for Vanir Office Dropdown
         const clientTableId = 'tblVpJCbIKpUqvnMg'; // Table for Client Name Dropdown
+        const projectSizeTableId = 'tblxiSxZuDcp8HmME'; // Table for Project Size (Stores Margin Variance)
+
         const fieldName = 'Office Name'; 
         const tierFields = ['Tier 1 Base', 'Tier 2 Base', 'Tier 3 Base']; 
 
@@ -97,6 +105,7 @@
                 const data = await response.json();
                 populateVanirOffices(data.records);
                 populateTierCheckboxes(data.records);
+                fetchProjectSizes(); // Fetch Project Sizes when page loads
 
                 document.getElementById('status').textContent = '';
 
@@ -128,32 +137,42 @@
         }
 
         async function fetchClientNames() {
-            const selectedOffice = document.getElementById('vanirOffice').value;
-            const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}`;
+    const selectedOffice = document.getElementById('vanirOffice').value;
+    let allRecords = [];
+    let offset = '';
 
-            try {
-                const response = await fetch(url, {
-                    headers: {
-                        Authorization: `Bearer ${airtableApiKey}`
-                    }
-                });
+    try {
+        do {
+            const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}?offset=${offset}`;
+            const response = await fetch(url, {
+                headers: { Authorization: `Bearer ${airtableApiKey}` }
+            });
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch client names');
-                }
-
-                const data = await response.json();
-                const filteredClients = data.records
-                    .filter(record => record.fields.Division === selectedOffice) // Only show matching Division
-                    .map(record => record.fields['Client Name']);
-
-                populateClientDropdown(filteredClients);
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById('clientName').innerHTML = '<option>Error loading clients</option>';
+            if (!response.ok) {
+                throw new Error('Failed to fetch client names');
             }
-        }
+
+            const data = await response.json();
+            allRecords = [...allRecords, ...data.records];
+
+            // If an offset exists, continue fetching
+            offset = data.offset || '';
+
+        } while (offset); // Keep fetching until no offset exists
+
+        // Filter only clients that match the selected Vanir Office
+        const filteredClients = allRecords
+            .filter(record => record.fields.Division === selectedOffice)
+            .map(record => record.fields['Client Name']);
+
+        populateClientDropdown(filteredClients);
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById('clientName').innerHTML = '<option>Error loading clients</option>';
+    }
+}
+
 
         function populateClientDropdown(clientNames) {
             const dropdown = document.getElementById('clientName');
@@ -168,6 +187,29 @@
                     option.value = client;
                     dropdown.appendChild(option);
                 });
+            }
+        }
+
+        async function fetchProjectSizes() {
+            const url = `https://api.airtable.com/v0/${baseId}/${projectSizeTableId}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        Authorization: `Bearer ${airtableApiKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch project sizes');
+                }
+
+                const data = await response.json();
+                populateProjectSizeRadioButtons(data.records);
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('projectSizeRadioButtons').innerHTML = '<p>Error loading project sizes</p>';
             }
         }
 
@@ -213,6 +255,43 @@
                 label.appendChild(document.createTextNode(` ${item.fieldName}`)); 
                 checkboxContainer.appendChild(label);
             });
+        }
+
+        function populateProjectSizeRadioButtons(records) {
+            const container = document.getElementById('projectSizeRadioButtons');
+            container.innerHTML = '';
+
+            let projectSizeData = [];
+
+            records.forEach(record => {
+                if (record.fields['Project Size'] && record.fields['Margin Variance']) {
+                    projectSizeData.push({
+                        displayName: record.fields['Project Size'], 
+                        value: record.fields['Margin Variance']
+                    });
+                }
+            });
+
+            projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName)); // Sort alphabetically
+
+            if (projectSizeData.length === 0) {
+                container.innerHTML = '<p>No project sizes available</p>';
+                return;
+            }
+
+            projectSizeData.forEach(item => {
+                const label = document.createElement('label');
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.value = item.value; // Store Margin Variance as value
+                radio.name = "projectSizeSelection";
+
+                label.appendChild(radio);
+                label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Project Size
+                container.appendChild(label);
+            });
+
+            console.log("Project Size radio buttons populated successfully.");
         }
 
         fetchData();
