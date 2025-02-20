@@ -13,31 +13,51 @@
         document.getElementById("materialRadioButtons").addEventListener("change", filterResults);
     });
 
-    /** Fetch all records from Airtable and store them globally */
     async function fetchAllData() {
-        const url = `https://api.airtable.com/v0/${baseId2}/${tableId2}`;
-
+        if (allRecords.length > 0) {
+            console.log("🚀 Data already fetched. Skipping new fetch.");
+            return;
+        }
+    
+        let url = `https://api.airtable.com/v0/${baseId2}/${tableId2}`;
+        let offset = '';
+        allRecords = []; // Reset records
+    
         try {
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: `Bearer ${airtableApiKey2}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch data');
-
-            const data = await response.json();
-            allRecords = data.records; // Store records globally
-
+            do {
+                const response = await fetch(`${url}?offset=${offset}`, {
+                    headers: {
+                        Authorization: `Bearer ${airtableApiKey2}`
+                    }
+                });
+    
+                if (!response.ok) throw new Error('Failed to fetch data');
+    
+                const data = await response.json();
+                allRecords = [...allRecords, ...data.records]; // Append new records
+    
+                offset = data.offset || ''; // Get next offset if available
+            } while (offset); // Continue if there's more data
+    
+            console.log("✅ Total Records Fetched:", allRecords.length);
+    
+            // Ensure we only populate project types ONCE
+            if (!document.getElementById('projectRadioButtons').innerHTML) {
+                populateProjectTypes(allRecords);
+            }
+    
             populateVanirOffices(allRecords);
             populateSidingStyle(allRecords);
-            populateProjectTypes(allRecords);
-            displayResults(allRecords); // Display all records initially
+    
+            displayResults(allRecords);
         } catch (error) {
             console.error("❌ Error fetching data:", error);
             document.getElementById('resultsContainer').innerHTML = '<p>Error loading data.</p>';
         }
     }
+    
+    
+
 
     /** Populate Vanir Office Dropdown */
     function populateVanirOffices(records) {
@@ -57,106 +77,170 @@
         console.log("✅ Vanir Offices Populated:", officeNames);
     }
 
-    /** Populate Material Used (Mapped to "Siding Style") */
-    function populateSidingStyle(records) {
-        const container = document.getElementById('materialRadioButtons');
-        container.innerHTML = '';
+    // Mapping material names to numbers
+const materialToNumberMapping = {
+    "Hard Siding": "0.0",
+    "Vinyl": "1.0",
+    "Labor Only": "3.0"
+};
 
-        let sidingStyles = [...new Set(records.map(record => record.fields['Siding Style']).filter(Boolean))];
-        sidingStyles.sort();
+const numberToMaterialMapping = {
+    "0.0": "Hard Siding",
+    "1.0": "Vinyl",
+    "3.0": "Labor Only"
+};
 
-        sidingStyles.forEach(style => {
-            const label = document.createElement('label');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = style;
-            checkbox.name = "sidingStyle";
+function populateSidingStyle(records) {
+    const container = document.getElementById('materialRadioButtons');
+    container.innerHTML = '';
 
-            label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(` ${style}`));
-            container.appendChild(label);
-        });
+    let sidingStyles = [...new Set(records.map(record => record.fields['Siding Style']?.trim()).filter(Boolean))];
+    sidingStyles.sort();
 
-        console.log("✅ Siding Styles Populated:", sidingStyles);
-    }
+    sidingStyles.forEach(style => {
+        const label = document.createElement('label');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.value = materialToNumberMapping[style] || '';  // Store numeric value
+        radio.name = "sidingStyle";  
 
-    /** Populate Project Type (Mapped to "Type") */
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(` ${style}`)); // Display text
+
+        container.appendChild(label);
+    });
+
+    console.log("✅ Siding Styles Populated:", sidingStyles);
+}
+
+    
+
     function populateProjectTypes(records) {
+        console.log("🚀 Populating Project Types...");
+    
         const container = document.getElementById('projectRadioButtons');
         container.innerHTML = '';
-
-        let projectTypes = [...new Set(records.map(record => record.fields['Type']).filter(Boolean))];
+    
+        let projectTypes = [...new Set(records.map(record => record.fields['Type']?.trim()).filter(Boolean))];
+    
         projectTypes.sort();
-
+    
         projectTypes.forEach(type => {
             const label = document.createElement('label');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = type;
-            checkbox.name = "projectType";
-
-            label.appendChild(checkbox);
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.value = type; // Store full text instead of a numeric value
+            radio.name = "projectType";
+    
+            label.appendChild(radio);
             label.appendChild(document.createTextNode(` ${type}`));
             container.appendChild(label);
         });
-
+    
         console.log("✅ Project Types Populated:", projectTypes);
     }
+    
+    
+    
 
-    /** Filter and display records based on selected filters */
-    function filterResults() {
-        const selectedOffice = document.getElementById("vanirOffice").value;
-        const selectedSidingStyles = Array.from(document.querySelectorAll('#materialRadioButtons input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.value);
-        const selectedProjectTypes = Array.from(document.querySelectorAll('#projectRadioButtons input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.value);
 
-        console.log("✅ Selected Office:", selectedOffice);
-        console.log("✅ Selected Siding Styles:", selectedSidingStyles.length > 0 ? selectedSidingStyles : "None Selected");
-        console.log("✅ Selected Project Types:", selectedProjectTypes.length > 0 ? selectedProjectTypes : "None Selected");
+    
 
-        // Filter records
-        const filteredRecords = allRecords.filter(record =>
-            (!selectedOffice || record.fields['Vanir Offices'] === selectedOffice) &&
-            (selectedSidingStyles.length === 0 || selectedSidingStyles.includes(record.fields['Siding Style'])) &&
-            (selectedProjectTypes.length === 0 || selectedProjectTypes.includes(record.fields['Type']))
-        );
+  // Mapping project type numbers to actual names
+const projectTypeMapping = {
+    "0.0": "Single Family",
+    "0.5": "2 Story Townhomes",
+    "1.0": "3 Story Townhomes",
+    "1.5": "4 Story Townhomes"
+};
 
-        console.log("✅ Filtered Records:", filteredRecords);
-        displayResults(filteredRecords);
-    }
+// Mapping material numbers to actual names
+const materialMapping = {
+    "0.0": "Hard Siding",
+    "1.0": "Vinyl",
+    "3.0": "Labor Only"
+};
+
+
+
+function filterResults() {
+    console.log("🔍 Running filterResults...");
+
+    const selectedOffice = document.getElementById("vanirOffice").value.trim();
+    const selectedSidingStyleValue = document.querySelector('#materialRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
+    const selectedProjectTypeValue = document.querySelector('#projectRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
+
+    // Convert numeric values back to actual names
+    const selectedSidingStyle = numberToMaterialMapping[selectedSidingStyleValue] || '';
+    const selectedProjectType = projectTypeMapping[selectedProjectTypeValue] || '';
+
+    console.log("✅ Selected Office:", selectedOffice);
+    console.log("✅ Selected Siding Style (Mapped):", selectedSidingStyle);
+    console.log("✅ Selected Project Type (Mapped):", selectedProjectType);
+
+    console.log("🧐 Available Fields in a Record:", Object.keys(allRecords[0]?.fields || {}));
+    console.log("🧐 Project Types in Airtable:", allRecords.map(record => `"${record.fields?.['Type']}"`));
+    console.log("🧐 Materials in Airtable:", allRecords.map(record => `"${record.fields?.['Siding Style']}"`));
+
+    const filteredRecords = allRecords.filter(record => {
+        const office = record.fields?.['Vanir Offices']?.trim().toLowerCase() || '';
+        const siding = record.fields?.['Siding Style']?.trim() || 'unknown';
+        const type = record.fields?.['Type']?.trim() || 'unknown';
+
+        return (!selectedOffice || office === selectedOffice.toLowerCase()) &&
+               (!selectedSidingStyle || siding === selectedSidingStyle) &&
+               (!selectedProjectType || type === selectedProjectType);
+    });
+
+    console.log("✅ Filtered Records Count:", filteredRecords.length, filteredRecords);
+    displayResults(filteredRecords);
+}
+
+
+
+
+    
+    
+    
+    
+    
 
     /** Display filtered records in a table */
     function displayResults(records) {
         const container = document.getElementById('resultsContainer');
-        container.innerHTML = '';
-
+        console.log("✅ Updating resultsContainer", records.length);
+    
+        container.innerHTML = ''; // Clear previous results
+    
         if (records.length === 0) {
             container.innerHTML = '<p>No matching results found.</p>';
             return;
         }
-
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <tr>
-                <th>Description</th>
-                <th>Price/Rate (UOM)</th>
-            </tr>
+    
+        let tableHTML = `
+            <table>
+                <tr>
+                    <th>Description</th>
+                    <th>Price/Rate (UOM)</th>
+                </tr>
         `;
-
+    
         records.forEach(record => {
             const priceRate = record.fields['Price/Rate'] || 'N/A';
-            const uom = record.fields['UOM'] || ''; // Get UOM field
-            const priceWithUOM = uom ? `${priceRate} ${uom}` : priceRate; // Concatenate Price/Rate and UOM
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${record.fields.Description || 'N/A'}</td>
-                <td>${priceWithUOM}</td>
+            const uom = record.fields['UOM'] || '';
+            const priceWithUOM = uom ? `${priceRate} ${uom}` : priceRate;
+    
+            tableHTML += `
+                <tr>
+                    <td>${record.fields.Description || 'N/A'}</td>
+                    <td>${priceWithUOM}</td>
+                </tr>
             `;
-            table.appendChild(row);
         });
-
-        container.appendChild(table);
+    
+        tableHTML += `</table>`;
+        
+        container.innerHTML = tableHTML;
     }
+    
 })();
