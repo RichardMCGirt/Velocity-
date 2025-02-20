@@ -29,6 +29,7 @@ async function fetchData() {
             headers: {
                 Authorization: `Bearer ${airtableApiKey}`
             }
+            
         });
 
         if (!response.ok) {
@@ -80,8 +81,10 @@ async function fetchAllClientNames() {
         do {
             const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}?offset=${offset}`;
             const response = await fetch(url, {
-                headers: { Authorization: `Bearer ${airtableApiKey}` }
-            });
+                headers: {
+                    Authorization: `Bearer ${airtableApiKey}`
+                }
+                            });
 
             if (!response.ok) {
                 throw new Error('Failed to fetch client names');
@@ -146,6 +149,7 @@ async function fetchProjectSizes() {
             headers: {
                 Authorization: `Bearer ${airtableApiKey}`
             }
+            
         });
 
         if (!response.ok) {
