@@ -197,12 +197,21 @@ function materialRadioButtons(records) {
     records.forEach(record => {
         // Ensure Material Type exists & Allow Margin Variance even if it's 0
         if (record.fields['Material Type'] !== undefined && record.fields['Margin Variance'] !== undefined) {
+            const materialType = record.fields['Material Type'].trim(); // ✅ Trim spaces
+            const marginVariance = record.fields['Margin Variance'];
+
             materialData.push({
-                displayName: record.fields['Material Type'], 
-                value: record.fields['Margin Variance']
+                displayName: materialType,
+                value: marginVariance
             });
         }
     });
+
+    // ❌ Ensure Universal is removed, but Labor Only is NOT removed
+    materialData = materialData.filter(item => item.displayName.toLowerCase() !== "universal"); // ✅ Normalize casing
+
+    // ✅ Debugging: Check if "Labor Only" exists
+    console.log("✅ Material Types After Filtering:", materialData.map(m => m.displayName));
 
     // Sort alphabetically
     materialData.sort((a, b) => a.displayName.localeCompare(b.displayName));
@@ -223,7 +232,7 @@ function materialRadioButtons(records) {
 
         const radio = document.createElement('input');
         radio.type = 'radio';
-        radio.value = item.value; // Store Margin Variance as value
+        radio.value = item.displayName; // ✅ Store Material Type as value
         radio.name = "materialSelection";
 
         label.appendChild(radio);
@@ -233,8 +242,10 @@ function materialRadioButtons(records) {
 
     container.appendChild(radioGroup);
 
-    console.log("Material radio buttons populated successfully.");
+    console.log("✅ Material radio buttons populated successfully.");
 }
+
+
 
 
 

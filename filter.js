@@ -77,68 +77,78 @@
         console.log("✅ Vanir Offices Populated:", officeNames);
     }
 
-    // Mapping material names to numbers
-const materialToNumberMapping = {
-    "Hard Siding": "0.0",
-    "Vinyl": "1.0",
-    "Labor Only": "3.0"
-};
-
-const numberToMaterialMapping = {
-    "0.0": "Hard Siding",
-    "1.0": "Vinyl",
-    "3.0": "Labor Only"
-};
-
-function populateSidingStyle(records) {
-    const container = document.getElementById('materialRadioButtons');
-    container.innerHTML = '';
-
-    let sidingStyles = [...new Set(records.map(record => record.fields['Siding Style']?.trim()).filter(Boolean))];
-    sidingStyles.sort();
-
-    sidingStyles.forEach(style => {
-        const label = document.createElement('label');
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.value = materialToNumberMapping[style] || '';  // Store numeric value
-        radio.name = "sidingStyle";  
-
-        label.appendChild(radio);
-        label.appendChild(document.createTextNode(` ${style}`)); // Display text
-
-        container.appendChild(label);
-    });
-
-    console.log("✅ Siding Styles Populated:", sidingStyles);
-}
-
-    
-
-    function populateProjectTypes(records) {
-        console.log("🚀 Populating Project Types...");
-    
-        const container = document.getElementById('projectRadioButtons');
+    function populateSidingStyle(records) {
+        const container = document.getElementById('materialRadioButtons');
         container.innerHTML = '';
     
-        let projectTypes = [...new Set(records.map(record => record.fields['Type']?.trim()).filter(Boolean))];
+        let sidingStyles = [...new Set(
+            records.map(record => record.fields['Siding Style']?.trim()).filter(Boolean)
+        )];
     
-        projectTypes.sort();
+        // ❌ Remove "Universal" from the list
+        sidingStyles = sidingStyles.filter(style => style !== "Universal");
     
-        projectTypes.forEach(type => {
+        // Sort alphabetically
+        sidingStyles.sort();
+    
+        sidingStyles.forEach(style => {
             const label = document.createElement('label');
             const radio = document.createElement('input');
             radio.type = 'radio';
-            radio.value = type; // Store full text instead of a numeric value
-            radio.name = "projectType";
+            radio.value = style;
+            radio.name = "sidingStyle"; // Ensure all have the same name
     
             label.appendChild(radio);
-            label.appendChild(document.createTextNode(` ${type}`));
+            label.appendChild(document.createTextNode(` ${style}`));
             container.appendChild(label);
         });
     
-        console.log("✅ Project Types Populated:", projectTypes);
+        console.log("✅ Siding Styles Populated (excluding Universal):", sidingStyles);
     }
+    
+    
+
+    function populateSidingStyle(records) {
+        const container = document.getElementById('materialRadioButtons');
+        container.innerHTML = '';
+    
+        let sidingStyles = [...new Set(
+            records
+                .map(record => record.fields['Siding Style']?.trim().replace(/"/g, ''))
+                .filter(Boolean) // Remove null/empty values
+        )];
+    
+        // ✅ Debug before filtering
+        console.log("🧐 All Siding Styles Before Filtering:", sidingStyles);
+    
+        // ❌ Remove "Universal", but DO NOT remove "Labor Only"
+        sidingStyles = sidingStyles.filter(style => style.toLowerCase() !== "universal");
+    
+        // ✅ Ensure "Labor Only" is included
+        if (!sidingStyles.includes("Labor Only")) {
+            sidingStyles.push("Labor Only");
+            console.log("🚀 'Labor Only' was missing and has been added.");
+        }
+    
+        // Sort alphabetically
+        sidingStyles.sort();
+    
+        sidingStyles.forEach(style => {
+            const label = document.createElement('label');
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.value = style.trim();  // ✅ Store Material Name
+            radio.name = "sidingStyle"; // Ensure all have the same name
+    
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(` ${style}`));
+            container.appendChild(label);
+        });
+    
+        console.log("✅ Final Siding Styles (excluding Universal, including Labor Only):", sidingStyles);
+    }
+    
+    
     
     
     
@@ -170,9 +180,9 @@ function filterResults() {
     const selectedSidingStyleValue = document.querySelector('#materialRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
     const selectedProjectTypeValue = document.querySelector('#projectRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
 
-    // Convert numeric values back to actual names
-    const selectedSidingStyle = numberToMaterialMapping[selectedSidingStyleValue] || '';
-    const selectedProjectType = projectTypeMapping[selectedProjectTypeValue] || '';
+    // ✅ Convert numeric material and project type values back to text
+    const selectedSidingStyle = materialMapping[selectedSidingStyleValue] || selectedSidingStyleValue;
+    const selectedProjectType = projectTypeMapping[selectedProjectTypeValue] || selectedProjectTypeValue;
 
     console.log("✅ Selected Office:", selectedOffice);
     console.log("✅ Selected Siding Style (Mapped):", selectedSidingStyle);
@@ -184,8 +194,8 @@ function filterResults() {
 
     const filteredRecords = allRecords.filter(record => {
         const office = record.fields?.['Vanir Offices']?.trim().toLowerCase() || '';
-        const siding = record.fields?.['Siding Style']?.trim() || 'unknown';
-        const type = record.fields?.['Type']?.trim() || 'unknown';
+        const siding = record.fields?.['Siding Style']?.trim().replace(/"/g, '') || 'unknown';  // ✅ Remove quotes
+        const type = record.fields?.['Type']?.trim().replace(/"/g, '') || 'unknown';  // ✅ Remove quotes
 
         return (!selectedOffice || office === selectedOffice.toLowerCase()) &&
                (!selectedSidingStyle || siding === selectedSidingStyle) &&
@@ -195,6 +205,7 @@ function filterResults() {
     console.log("✅ Filtered Records Count:", filteredRecords.length, filteredRecords);
     displayResults(filteredRecords);
 }
+
 
 
 
