@@ -148,19 +148,12 @@
         console.log("✅ Final Siding Styles (excluding Universal, including Labor Only):", sidingStyles);
     }
     
-    
-    
-    
-    
-
-
-    
 
   // Mapping project type numbers to actual names
 const projectTypeMapping = {
-    "0.0": "Single Family",
+    "0": "Single Family",
     "0.5": "2 Story Townhomes",
-    "1.0": "3 Story Townhomes",
+    "1": "3 Story Townhomes",
     "1.5": "4 Story Townhomes"
 };
 
@@ -180,31 +173,37 @@ function filterResults() {
     const selectedSidingStyleValue = document.querySelector('#materialRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
     const selectedProjectTypeValue = document.querySelector('#projectRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
 
-    // ✅ Convert numeric material and project type values back to text
+    // Convert numeric material and project type values back to text
     const selectedSidingStyle = materialMapping[selectedSidingStyleValue] || selectedSidingStyleValue;
     const selectedProjectType = projectTypeMapping[selectedProjectTypeValue] || selectedProjectTypeValue;
 
+    // 🧐 Debug logs to track what is being selected
     console.log("✅ Selected Office:", selectedOffice);
-    console.log("✅ Selected Siding Style (Mapped):", selectedSidingStyle);
-    console.log("✅ Selected Project Type (Mapped):", selectedProjectType);
+    console.log("🔍 Raw Selected Project Type Value:", selectedProjectTypeValue);
+    console.log("🔍 Mapped Project Type:", selectedProjectType);
+    console.log("🔍 Raw Selected Siding Style Value:", selectedSidingStyleValue);
+    console.log("🔍 Mapped Siding Style:", selectedSidingStyle);
 
     console.log("🧐 Available Fields in a Record:", Object.keys(allRecords[0]?.fields || {}));
     console.log("🧐 Project Types in Airtable:", allRecords.map(record => `"${record.fields?.['Type']}"`));
     console.log("🧐 Materials in Airtable:", allRecords.map(record => `"${record.fields?.['Siding Style']}"`));
 
     const filteredRecords = allRecords.filter(record => {
-        const office = record.fields?.['Vanir Offices']?.trim().toLowerCase() || '';
-        const siding = record.fields?.['Siding Style']?.trim().replace(/"/g, '') || 'unknown';  // ✅ Remove quotes
-        const type = record.fields?.['Type']?.trim().replace(/"/g, '') || 'unknown';  // ✅ Remove quotes
+        const office = (record.fields?.['Vanir Offices'] || '').trim().toLowerCase();
+        const siding = (record.fields?.['Siding Style'] || '').trim().replace(/"/g, '');
+        const type = (record.fields?.['Type'] || '').trim().replace(/"/g, '');
 
         return (!selectedOffice || office === selectedOffice.toLowerCase()) &&
-               (!selectedSidingStyle || siding === selectedSidingStyle) &&
-               (!selectedProjectType || type === selectedProjectType);
+               (!selectedSidingStyle || siding.toLowerCase() === selectedSidingStyle.toLowerCase()) &&
+               (!selectedProjectType || type.toLowerCase() === selectedProjectType.toLowerCase());
     });
 
     console.log("✅ Filtered Records Count:", filteredRecords.length, filteredRecords);
     displayResults(filteredRecords);
 }
+
+
+
 
 
 
