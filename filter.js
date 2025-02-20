@@ -159,8 +159,8 @@ const projectTypeMapping = {
 
 // Mapping material numbers to actual names
 const materialMapping = {
-    "0.0": "Hard Siding",
-    "1.0": "Vinyl",
+    "0": "Hard Siding",
+    "1": "Vinyl",
     "3.0": "Labor Only"
 };
 
