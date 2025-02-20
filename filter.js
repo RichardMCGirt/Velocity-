@@ -140,15 +140,19 @@
         table.innerHTML = `
             <tr>
                 <th>Description</th>
-                <th>Price/Rate</th>
+                <th>Price/Rate (UOM)</th>
             </tr>
         `;
 
         records.forEach(record => {
+            const priceRate = record.fields['Price/Rate'] || 'N/A';
+            const uom = record.fields['UOM'] || ''; // Get UOM field
+            const priceWithUOM = uom ? `${priceRate} ${uom}` : priceRate; // Concatenate Price/Rate and UOM
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${record.fields.Description || 'N/A'}</td>
-                <td>${record.fields['Price/Rate'] || 'N/A'}</td>
+                <td>${priceWithUOM}</td>
             `;
             table.appendChild(row);
         });
