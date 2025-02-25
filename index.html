@@ -65,6 +65,7 @@
 <div class="total-margin-container">
     <input type="text" id="totalMarginVariance" readonly value="0">
 </div>
+<br>
 
 <div id="resultsContainer"></div>
 
@@ -75,7 +76,29 @@
     <script src="script.js"></script> 
     
     <script src="filter.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const resultsContainer = document.getElementById("resultsContainer");
+    const materialRadioButtons = document.getElementById("materialRadioButtons");
 
+    // Ensure resultsContainer is hidden initially
+    resultsContainer.style.display = "none";
+    console.log("Page loaded: resultsContainer is hidden");
+
+    // Listen for changes in the Material Used radio buttons
+    materialRadioButtons.addEventListener("change", function (event) {
+        console.log("Change detected in Material Used section");
+
+        if (event.target.type === "radio") {
+            console.log("Selected material:", event.target.value);
+            resultsContainer.style.display = "block"; // Show resultsContainer
+            console.log("resultsContainer is now visible");
+        }
+    });
+});
+
+
+</script>
 
 </body>
 

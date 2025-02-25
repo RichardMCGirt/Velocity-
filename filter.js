@@ -203,54 +203,85 @@ function filterResults() {
 }
 
 
+/** Display filtered records in a table with sorting options */
+function displayResults(records) {
+    const container = document.getElementById('resultsContainer');
+    console.log("✅ Updating resultsContainer", records.length);
 
+    container.innerHTML = ''; // Clear previous results
 
+    if (records.length === 0) {
+        container.innerHTML = '<p>No matching results found.</p>';
+        return;
+    }
 
+    // Sorting Controls
+    let sortingControls = `
+        <div class="sorting-buttons">
+            <button onclick="sortResults('alphabetical')">Sort A-Z</button>
+            <button onclick="sortResults('priceAsc')">Sort by Price ↑</button>
+            <button onclick="sortResults('priceDesc')">Sort by Price ↓</button>
+        </div>
+    `;
 
-
-
-    
-    
-    
-    
-    
-
-    /** Display filtered records in a table */
-    function displayResults(records) {
-        const container = document.getElementById('resultsContainer');
-        console.log("✅ Updating resultsContainer", records.length);
-    
-        container.innerHTML = ''; // Clear previous results
-    
-        if (records.length === 0) {
-            container.innerHTML = '<p>No matching results found.</p>';
-            return;
-        }
-    
-        let tableHTML = `
-            <table>
+    let tableHTML = `
+        ${sortingControls}
+        <table class="styled-table">
+            <thead>
                 <tr>
                     <th>Description</th>
                     <th>Price/Rate (UOM)</th>
                 </tr>
+            </thead>
+            <tbody id="tableBody">
+                ${generateTableRows(records)}
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = tableHTML;
+    window.currentRecords = records; // Store for sorting
+}
+
+
+/** Generate table rows based on records */
+function generateTableRows(records) {
+    return records.map(record => {
+        const priceRate = record.fields['Price/Rate'] || 'N/A';
+        const uom = record.fields['UOM'] || '';
+        const priceWithUOM = uom ? `${priceRate} ${uom}` : priceRate;
+
+        return `
+            <tr>
+                <td>${record.fields.Description || 'N/A'}</td>
+                <td>${priceWithUOM}</td>
+            </tr>
         `;
-    
-        records.forEach(record => {
-            const priceRate = record.fields['Price/Rate'] || 'N/A';
-            const uom = record.fields['UOM'] || '';
-            const priceWithUOM = uom ? `${priceRate} ${uom}` : priceRate;
-    
-            tableHTML += `
-                <tr>
-                    <td>${record.fields.Description || 'N/A'}</td>
-                    <td>${priceWithUOM}</td>
-                </tr>
-            `;
-        });
-    
-        tableHTML += `</table>`;
-        
-        container.innerHTML = tableHTML;
-    }
+    }).join('');
+}
+
+/** Sort only the currently displayed results */
+window.sortResults = function (criteria) {
+    let displayedRows = Array.from(document.querySelectorAll("#tableBody tr")); // Get only displayed rows
+    console.log(`🔄 Sorting visible results by: ${criteria}`);
+
+    let sortedRows = displayedRows.sort((rowA, rowB) => {
+        let descA = rowA.cells[0].textContent.trim().toLowerCase();
+        let descB = rowB.cells[0].textContent.trim().toLowerCase();
+
+        let priceA = parseFloat(rowA.cells[1].textContent.trim()) || 0;
+        let priceB = parseFloat(rowB.cells[1].textContent.trim()) || 0;
+
+        return criteria === "alphabetical" ? descA.localeCompare(descB) :
+               criteria === "priceAsc" ? priceA - priceB :
+               priceB - priceA;
+    });
+
+    // Update the table with sorted rows
+    const tableBody = document.getElementById("tableBody");
+    tableBody.innerHTML = "";
+    sortedRows.forEach(row => tableBody.appendChild(row));
+};
+
     
 })();
