@@ -35,49 +35,74 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+let fetchInProgress = {}; // Track ongoing fetch requests
+
 async function getMarginVarianceFromAirtable(materialType) {
+    if (!materialType || materialType.trim() === '') return null;
+
+    // If a request for this material is already in progress, wait for it to complete
+    if (fetchInProgress[materialType]) {
+        console.warn(`⏳ Fetch already in progress for: ${materialType}`);
+        return fetchInProgress[materialType]; 
+    }
+
     const url = `https://api.airtable.com/v0/${baseId}/${materialTableId}`;
 
     try {
-        const response = await fetch(url, {
+        fetchInProgress[materialType] = fetch(url, {
             headers: { Authorization: `Bearer ${airtableApiKey}` }
+        }).then(response => {
+            if (!response.ok) throw new Error('Failed to fetch material data from Airtable');
+            return response.json();
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch material data from Airtable');
-        }
+        const data = await fetchInProgress[materialType];
 
-        const data = await response.json();
-        
-        // Find the corresponding margin variance for the selected material
         const materialRecord = data.records.find(record => 
             record.fields['Material Type'] && record.fields['Material Type'].trim().toLowerCase() === materialType.toLowerCase()
         );
 
-        return materialRecord ? materialRecord.fields['Margin Variance'] : "N/A";
+        fetchInProgress[materialType] = null; // Clear fetch tracking
 
+        return materialRecord ? materialRecord.fields['Margin Variance'] : null;
     } catch (error) {
         console.error("❌ Error fetching Margin Variance:", error);
-        return "N/A";
+        fetchInProgress[materialType] = null; // Clear fetch tracking
+        return null;
     }
 }
 
-// **Event Listener for Radio Button Changes**
+
+
+let previousSelections = {};
+
 document.body.addEventListener("change", async function (event) {
     if (event.target.type === "radio") {
-        console.log(`🔘 Radio button selected: ${event.target.value}`);
-
         const selectedMaterial = event.target.value.trim();
-        const marginVariance = await getMarginVarianceFromAirtable(selectedMaterial);
 
-        console.log(`📊 Fetched Margin Variance for ${selectedMaterial}: ${marginVariance}`);
+        if (previousSelections[selectedMaterial]) {
+            console.log(`🔄 Using stored margin variance for ${selectedMaterial}: ${previousSelections[selectedMaterial]}`);
+            event.target.value = previousSelections[selectedMaterial];
+            updateTotalMarginVariance();
+            return;
+        }
 
-        // Update the radio button value to the correct numeric margin variance
-        event.target.value = marginVariance; // ✅ Correct radio value
+        let marginVariance = await getMarginVarianceFromAirtable(selectedMaterial);
 
-        updateTotalMarginVariance(); // ✅ Recalculate with correct values
+        if (marginVariance === null) {
+            console.warn(`⚠️ No valid margin variance found for ${selectedMaterial}. Keeping previous value.`);
+            return;
+        }
+
+        previousSelections[selectedMaterial] = marginVariance; // Store the fetched value
+        console.log(`📊 Storing Margin Variance for ${selectedMaterial}: ${marginVariance}`);
+
+        event.target.value = marginVariance;
+        updateTotalMarginVariance();
     }
 });
+
+
 
 
 
