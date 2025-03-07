@@ -15,34 +15,94 @@ let allClients = []; // Global array to store client data
 
 document.addEventListener("DOMContentLoaded", function () {
     fetchAllClientNames(); // Load all client names on page load
+    fetchData(); // Fetch Vanir Offices and related data
 
     const vanirOfficeDropdown = document.getElementById("vanirOffice");
-    vanirOfficeDropdown.addEventListener("change", fetchClientNames); // Fetch clients locally on selection
+    const clientNameContainer = document.getElementById("clientNameContainer");
+
+    // Hide containers initially
+    if (totalMarginContainer) totalMarginContainer.style.display = "none";
+    if (clientNameContainer) clientNameContainer.style.display = "none";
+
+    // Show Client Name dropdown when Vanir Office is selected
+    vanirOfficeDropdown.addEventListener("change", function () {
+        if (vanirOfficeDropdown.value) {
+            clientNameContainer.style.display = "block"; // Show the section
+            fetchClientNames(); // Populate Client Dropdown
+        } else {
+            clientNameContainer.style.display = "none"; // Hide if nothing is selected
+        }
+    });
+});
+
+async function getMarginVarianceFromAirtable(materialType) {
+    const url = `https://api.airtable.com/v0/${baseId}/${materialTableId}`;
+
+    try {
+        const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${airtableApiKey}` }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch material data from Airtable');
+        }
+
+        const data = await response.json();
+        
+        // Find the corresponding margin variance for the selected material
+        const materialRecord = data.records.find(record => 
+            record.fields['Material Type'] && record.fields['Material Type'].trim().toLowerCase() === materialType.toLowerCase()
+        );
+
+        return materialRecord ? materialRecord.fields['Margin Variance'] : "N/A";
+
+    } catch (error) {
+        console.error("❌ Error fetching Margin Variance:", error);
+        return "N/A";
+    }
+}
+
+// **Event Listener for Radio Button Changes**
+document.body.addEventListener("change", async function (event) {
+    if (event.target.type === "radio") {
+        console.log(`🔘 Radio button selected: ${event.target.value}`);
+
+        const selectedMaterial = event.target.value.trim();
+        const marginVariance = await getMarginVarianceFromAirtable(selectedMaterial);
+
+        console.log(`📊 Fetched Margin Variance for ${selectedMaterial}: ${marginVariance}`);
+
+        // Update the radio button value to the correct numeric margin variance
+        event.target.value = marginVariance; // ✅ Correct radio value
+
+        updateTotalMarginVariance(); // ✅ Recalculate with correct values
+    }
 });
 
 
+
+
+
+// **Fetch Vanir Offices & Project Data**
 async function fetchData() {
     const url = `https://api.airtable.com/v0/${baseId}/${vanirOfficeTableId}`;
 
     try {
         const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${airtableApiKey}`
-            }
-            
+            headers: { Authorization: `Bearer ${airtableApiKey}` }
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch data');
-        }
+        if (!response.ok) throw new Error('Failed to fetch data');
 
         const data = await response.json();
         populateVanirOffices(data.records);
         populateTierCheckboxes(data.records);
-        fetchProjectSizes(); // Fetch Project Sizes when page loads
-        fetchLocation(); // Fetch Project Sizes when page loads
-        fetchProjectType(); // Fetch Project Type when page loads
-        fetchMaterial(); // Fetch Material
+        
+        // Fetch related data
+        fetchProjectSizes();
+        fetchLocation();
+        fetchProjectType();
+        fetchMaterial();
 
         document.getElementById('status').textContent = '';
 
@@ -187,7 +247,6 @@ async function fetchMaterial() {
         document.getElementById('materialsRadioButtons').innerHTML = '<p>Error loading materials</p>';
     }
 }
-
 function materialRadioButtons(records) {
     const container = document.getElementById('materialRadioButtons');
     container.innerHTML = '';
@@ -195,25 +254,16 @@ function materialRadioButtons(records) {
     let materialData = [];
 
     records.forEach(record => {
-        // Ensure Material Type exists & Allow Margin Variance even if it's 0
-        if (record.fields['Material Type'] !== undefined && record.fields['Margin Variance'] !== undefined) {
-            const materialType = record.fields['Material Type'].trim(); // ✅ Trim spaces
-            const marginVariance = record.fields['Margin Variance'];
-
+        if (record.fields['Material Type'] && record.fields['Margin Variance']) {
             materialData.push({
-                displayName: materialType,
-                value: marginVariance
+                displayName: record.fields['Material Type'].trim(),
+                value: record.fields['Margin Variance'] // ✅ Correctly store numeric Margin Variance
             });
         }
     });
 
-    // ❌ Ensure Universal is removed, but Labor Only is NOT removed
-    materialData = materialData.filter(item => item.displayName.toLowerCase() !== "universal"); // ✅ Normalize casing
+    console.log("✅ Material Types After Filtering:", materialData.map(m => `${m.displayName} (Value: ${m.value})`));
 
-    // ✅ Debugging: Check if "Labor Only" exists
-    console.log("✅ Material Types After Filtering:", materialData.map(m => m.displayName));
-
-    // Sort alphabetically
     materialData.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     if (materialData.length === 0) {
@@ -221,22 +271,22 @@ function materialRadioButtons(records) {
         return;
     }
 
-    // Create a div to center the radio buttons
     const radioGroup = document.createElement('div');
-    radioGroup.classList.add('radio-group'); // Apply CSS for centering
+    radioGroup.classList.add('radio-group');
 
     materialData.forEach(item => {
         console.log(`Creating radio button: ${item.displayName} (Value: ${item.value})`);
+
         const label = document.createElement('label');
-        label.classList.add('radio-label'); // Ensures label alignment
+        label.classList.add('radio-label');
 
         const radio = document.createElement('input');
         radio.type = 'radio';
-        radio.value = item.displayName; // ✅ Store Material Type as value
+        radio.value = item.value; // ✅ Now stores the numeric value (e.g., 3)
         radio.name = "materialSelection";
 
         label.appendChild(radio);
-        label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Material Type
+        label.appendChild(document.createTextNode(` ${item.displayName}`));
         radioGroup.appendChild(label);
     });
 
@@ -244,6 +294,7 @@ function materialRadioButtons(records) {
 
     console.log("✅ Material radio buttons populated successfully.");
 }
+
 
 
 
@@ -480,20 +531,6 @@ function populateProjectSizeRadioButtons(records) {
 }
 
 
-function updateTotalMarginVariance() {
-    let total = 0;
-
-    // Get all selected radio buttons in each group
-    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-        total += parseFloat(radio.value) || 0; // Convert value to number & sum up
-    });
-
-    // Update the total input field with % symbol
-    document.getElementById('totalMarginVariance').value = "Recommended Margin: " + total.toFixed(2) + "%"; // Keep 2 decimal places
-}
-
-
-
 // Attach event listeners to all radio buttons
 document.addEventListener('change', event => {
     if (event.target.type === 'radio') {
@@ -502,7 +539,7 @@ document.addEventListener('change', event => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    const totalMarginContainer = document.querySelector(".total-margin-container");
+    const totalMarginContainer = document.querySelector("totalMarginVariance");
     
     // Initially hide the container
     if (totalMarginContainer) {
@@ -512,19 +549,8 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("❌ Error: Total Margin Container not found!");
     }
 
-    // Use event delegation to detect dynamically added radio buttons
-    document.body.addEventListener("change", function (event) {
-        if (event.target.type === "radio") {
-            console.log(`🔘 Radio button selected: ${event.target.value}`);
-
-            // Ensure the container is available before showing
-            if (totalMarginContainer) {
-                totalMarginContainer.style.display = "flex"; 
-            } else {
-                console.error("❌ Error: Total Margin Container not found when trying to show.");
-            }
-        }
-    });
+    
+    
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -551,45 +577,66 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// **Calculate & Update Total Margin Variance**
 function updateTotalMarginVariance() {
     let total = 0;
+    console.log("🔍 Updating Total Margin Variance...");
 
-    // Get all selected radio buttons in each group
+    // Sum up selected radio button values
     document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-        total += parseFloat(radio.value) || 0; // Convert value to number & sum up
+        const value = parseFloat(radio.value);
+        if (!isNaN(value)) {
+            console.log(`✅ Selected: ${radio.name} -> Value: ${value}`);
+            total += value;
+        } else {
+            console.warn(`⚠️ Invalid value detected for ${radio.name}: ${radio.value}`);
+        }
     });
 
-    // Get selected tier
-    const selectedTier = document.querySelector('input[name="tierSelection"]:checked');
+    console.log(`📊 Total Margin before tier adjustment: ${total.toFixed(2)}%`);
 
-    let minMargin, maxMargin;
+    const selectedTier = document.querySelector('input[name="tierSelection"]:checked');
+    let minMargin = total, maxMargin = total;
 
     if (selectedTier) {
-        // Get the label text for the selected tier
-        const tierLabel = selectedTier.nextSibling.textContent.trim(); 
+        const tierLabel = selectedTier.nextSibling ? selectedTier.nextSibling.textContent.trim() : "Unknown";
+        console.log(`🎯 Selected Tier: ${tierLabel}`);
 
-        if (tierLabel === "Tier 1 Base") {
-            minMargin = total - 2;
-            maxMargin = total + 2;
-        } else if (tierLabel === "Tier 2 Base") {
-            minMargin = total - 1;
-            maxMargin = total + 1;
-        } else if (tierLabel === "Tier 3 Base") {
-            minMargin = Math.max(0, total - 1); // Prevent negative margin
-            maxMargin = total + 2;
-        } else {
-            minMargin = total;
-            maxMargin = total;
+        switch (tierLabel) {
+            case "Tier 1 Base":
+                minMargin = total - 2;
+                maxMargin = total + 2;
+                break;
+            case "Tier 2 Base":
+                minMargin = total - 1;
+                maxMargin = total + 1;
+                break;
+            case "Tier 3 Base":
+                minMargin = Math.max(0, total - 1);
+                maxMargin = total + 2;
+                break;
+            default:
+                console.warn(`⚠️ Unknown tier label: ${tierLabel}`);
         }
     } else {
-        minMargin = total;
-        maxMargin = total;
+        console.log("ℹ️ No Tier selected, using default values.");
     }
 
-    // Update the total input field with % symbol
-    document.getElementById('totalMarginVariance').value =
-        `Recommended Margin: ${total.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`;
+    console.log(`📏 Calculated Margin Range: Min=${minMargin.toFixed(2)}%, Max=${maxMargin.toFixed(2)}%`);
+
+    const marginInput = document.getElementById('totalMarginVariance');
+
+    if (marginInput) {
+        marginInput.value = `Recommended Margin: ${total.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`;
+        console.log(`✅ Updated totalMarginVariance input: ${marginInput.value}`);
+    } else {
+        console.error("❌ Error: Element with ID 'totalMarginVariance' not found.");
+    }
 }
+
+
+
+
 
 // Attach event listeners to all radio buttons including tiers
 document.addEventListener('change', event => {
