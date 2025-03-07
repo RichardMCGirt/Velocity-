@@ -283,8 +283,8 @@ button:hover {
     }
 
     input[type="radio"] {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
     }
 
     #tierCheckboxes,
@@ -292,9 +292,25 @@ button:hover {
     #projectRadioButtons,
     #locationRadioButtons,
     #projectSizeRadioButtons {
-        padding-left: 5%;
-        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centers items */
+        justify-content: center; /* Centers items */
+        width: 100%; /* Full width */
+        margin: 0 auto; /* Center the container */
+    }
+
+    #tierCheckboxes label,
+    #materialRadioButtons label,
+    #projectRadioButtons label,
+    #locationRadioButtons label,
+    #projectSizeRadioButtons label {
+        display: flex;
         align-items: center;
+        justify-content: center; /* Centers text */
+        gap: 10px;
+        width: auto; /* Prevents stretching */
+        text-align: center;
     }
 
     .total-margin-container input {
@@ -306,6 +322,27 @@ button:hover {
 @media screen and (max-width: 480px) {
     h3 {
         font-size: 18px;
+    }
+
+    #tierCheckboxes,
+    #materialRadioButtons,
+    #projectRadioButtons,
+    #locationRadioButtons,
+    #projectSizeRadioButtons {
+        width: 100%;
+        padding-left: 0;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #tierCheckboxes label,
+    #materialRadioButtons label,
+    #projectRadioButtons label,
+    #locationRadioButtons label,
+    #projectSizeRadioButtons label {
+        width: 100%;
+        justify-content: center; /* Ensures text remains centered */
+        text-align: center;
     }
 
     .container {
@@ -326,8 +363,8 @@ button:hover {
     }
 
     input[type="radio"] {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
     }
 
     .button-container {
