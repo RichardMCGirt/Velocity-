@@ -168,9 +168,32 @@ input[type="radio"]:checked {
     margin: 0 auto 0 44%; /* Centers while slightly shifting right */
 }
 
+/* Hide both elements on page load */
+#sortingControlsContainer,
+#resultsContainer {
+    display: none; /* Default hidden state */
+    visibility: hidden; /* Prevents unwanted flashes */
+}
+
+
+
 
 #resultsContainer {
-    display: none;
+    min-height: 200px; /* Ensures visibility on small screens */
+    max-height: 60vh; /* Limits height to prevent excessive stretching */
+    overflow-y: auto; /* Enables scrolling */
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: white;
+}
+
+.styled-table thead {
+    position: sticky;
+    top: 0;
+    background-color: #24346c; /* Ensures visibility */
+    color: white;
+    z-index: 10;
 }
 
 
@@ -275,11 +298,28 @@ button:hover {
         width: 100%;
     }
 
+    #resultsContainer {
+        min-height: 250px;
+        max-height: 50vh; /* Limits height on mobile */
+        overflow-y: auto; /* Enables scrolling */
+        padding: 10px;
+    }
+
+    .styled-table thead {
+        font-size: 14px;
+    }
+
     button {
         width: 100%;
         max-width: 300px;
         font-size: 16px;
         padding: 12px;
+    }
+
+    .styled-table th, 
+    .styled-table td {
+        padding: 8px; /* Slightly smaller padding for better fit */
+        font-size: 14px; /* Smaller font on mobile */
     }
 
     input[type="radio"] {
@@ -355,6 +395,17 @@ button:hover {
         padding: 10px;
         width: 100%;
         max-width: 250px;
+    }
+
+    #resultsContainer {
+        min-height: 200px;
+        max-height: 45vh;
+    }
+
+    .styled-table th, 
+    .styled-table td {
+        font-size: 12px;
+        padding: 6px;
     }
 
     .total-margin-container input {

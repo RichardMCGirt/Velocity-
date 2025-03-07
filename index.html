@@ -27,12 +27,12 @@
       
 
      <!-- Client Name Dropdown (Initially Hidden) -->
-<div id="clientNameContainer">
+ <div id="1clientNameContainer" style="display: none;">
     <h3>Client Name</h3>
     <select id="clientName">
         <option></option>
     </select>
-</div>
+</div> 
 
        
 
@@ -67,6 +67,12 @@
 </div>
 <br>
 
+<div id="sortingControlsContainer" class="sorting-buttons">
+    <button onclick="sortResults('alphabetical')">Sort A-Z</button>
+    <button onclick="sortResults('priceAsc')">Sort by Price ↑</button>
+    <button onclick="sortResults('priceDesc')">Sort by Price ↓</button>
+</div>
+
 <div id="resultsContainer"></div>
 
 
@@ -77,25 +83,8 @@
     
     <script src="filter.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const resultsContainer = document.getElementById("resultsContainer");
-    const materialRadioButtons = document.getElementById("materialRadioButtons");
 
-    // Ensure resultsContainer is hidden initially
-    resultsContainer.style.display = "none";
-    console.log("Page loaded: resultsContainer is hidden");
 
-    // Listen for changes in the Material Used radio buttons
-    materialRadioButtons.addEventListener("change", function (event) {
-        console.log("Change detected in Material Used section");
-
-        if (event.target.type === "radio") {
-            console.log("Selected material:", event.target.value);
-            resultsContainer.style.display = "block"; // Show resultsContainer
-            console.log("resultsContainer is now visible");
-        }
-    });
-});
 
 
 </script>
