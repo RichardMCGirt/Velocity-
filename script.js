@@ -787,11 +787,7 @@ function updateTotalMarginVariance() {
     // **Update Margin Container**
     if (marginContainer) {
         marginContainer.innerHTML = `
-            <p><strong>Client Name:</strong> ${clientName}</p>
-            <p><strong>Account Type:</strong> ${accountType}</p>
-            <p><strong>Client Base Margin:</strong> ${clientMargin}%</p>
-            <p><strong>Additional Margin from Selections:</strong> ${total}%</p>
-            <p><strong>Total Margin Variance:</strong> <span id="totalMarginValue">${totalMargin.toFixed(2)}%</span></p>
+            
         `;
 
         marginContainer.style.display = "block";
