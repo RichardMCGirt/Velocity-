@@ -457,6 +457,9 @@ function populateLocationRadioButtons(records) {
     const container = document.getElementById('locationRadioButtons'); 
     container.innerHTML = '';
 
+    // ✅ Fix: Clear projectSizeData to prevent duplicates
+    projectSizeData = [];
+
     records.forEach(record => {
         if (record.fields['Distance'] !== undefined && record.fields['Margin Variance'] !== undefined) {
             projectSizeData.push({
@@ -465,6 +468,9 @@ function populateLocationRadioButtons(records) {
             });
         }
     });
+
+    // ✅ Fix: Remove duplicates using a Set
+    projectSizeData = [...new Map(projectSizeData.map(item => [item.displayName, item])).values()];
 
     projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName)); // Sort alphabetically
 
@@ -485,8 +491,9 @@ function populateLocationRadioButtons(records) {
         container.appendChild(label);
     });
 
-    console.log("Location radio buttons populated successfully.");
+    console.log("✅ Location radio buttons populated successfully, no duplicates.");
 }
+
 
 function populateProjecttypeRadioButtons(records) {
     const container = document.getElementById('projectRadioButtons'); 
