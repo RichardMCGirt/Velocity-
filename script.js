@@ -711,46 +711,98 @@ function updateTotalMarginVariance() {
         }
     });
 
-    console.log(`📊 Total Margin before tier adjustment: ${total.toFixed(2)}%`);
+    // Fetch required elements
+    const clientDropdown = document.getElementById("clientName");
+    const totalMarginInput = document.getElementById("totalMarginVariance");
+    const marginContainer = document.getElementById("marginContainer");
 
-    const selectedTier = document.querySelector('input[name="tierSelection"]:checked');
-    let minMargin = total, maxMargin = total;
+    if (!clientDropdown) {
+        console.error("❌ Error: Client Name dropdown is missing.");
+        return;
+    }
+    if (!totalMarginInput) {
+        console.error("❌ Error: Element with ID 'totalMarginVariance' not found in the DOM.");
+        return;
+    }
+    if (!marginContainer) {
+        console.warn("⚠️ Warning: Margin container not found. Proceeding without it.");
+    }
 
-    if (selectedTier) {
-        const tierLabel = selectedTier.nextSibling ? selectedTier.nextSibling.textContent.trim() : "Unknown";
-        console.log(`🎯 Selected Tier: ${tierLabel}`);
+    const selectedOption = clientDropdown.options[clientDropdown.selectedIndex];
 
-        switch (tierLabel) {
-            case "Tier 1 Base":
-                minMargin = total - 2;
-                maxMargin = total + 2;
+    let clientName = "No Client Selected";
+    let accountType = "Unknown";
+    let clientMargin = 0;
+
+    // **Check if a valid client is selected**
+    if (selectedOption && selectedOption.value) {
+        clientName = selectedOption.textContent.trim();
+        accountType = (selectedOption.dataset.accountType || "Unknown").trim();
+        console.log(`🎯 Client Selected: ${clientName}, Account Type: ${accountType}`);
+
+        // Assign base margin based on Account Type
+        switch (accountType) {
+            case "National":
+                clientMargin = 10;
                 break;
-            case "Tier 2 Base":
-                minMargin = total - 1;
-                maxMargin = total + 1;
+            case "Local Production":
+                clientMargin = 11;
                 break;
-            case "Tier 3 Base":
-                minMargin = Math.max(0, total - 1);
-                maxMargin = total + 2;
+            case "Custom":
+                clientMargin = 15;  // ✅ Now correctly assigns 15%
+                console.log("✅ Custom Account Type detected: +15% Base Margin Applied.");
                 break;
             default:
-                console.warn(`⚠️ Unknown tier label: ${tierLabel}`);
+                console.warn(`⚠️ Unrecognized Account Type: ${accountType}`);
+        }
+
+        // **Special Case: If "Assurance Restoration", add 15% bonus margin**
+        if (clientName === "Assurance Restoration") {
+            clientMargin += 15;
+            console.log("🔹 Bonus Margin Applied: +15% for Assurance Restoration");
         }
     } else {
-        console.log("ℹ️ No Tier selected, using default values.");
+        console.warn("⚠️ No client selected. Using default values.");
     }
 
-    console.log(`📏 Calculated Margin Range: Min=${minMargin.toFixed(2)}%, Max=${maxMargin.toFixed(2)}%`);
+    // **Final total margin calculation**
+    let totalMargin = total + clientMargin;
 
-    const marginInput = document.getElementById('totalMarginVariance');
+    // **Update UI Elements**
+    const accountTypeElement = document.getElementById("accountType");
+    if (accountTypeElement) {
+        accountTypeElement.textContent = accountType;
+    }
+    
+    const marginElement = document.getElementById("margin");
+    if (marginElement) {
+        marginElement.textContent = `${clientMargin}%`;
+    }
+    
 
-    if (marginInput) {
-        marginInput.value = `Recommended Margin: ${total.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`;
-        console.log(`✅ Updated totalMarginVariance input: ${marginInput.value}`);
-    } else {
-        console.error("❌ Error: Element with ID 'totalMarginVariance' not found.");
+    // **Set the input field value**
+    totalMarginInput.value = totalMargin.toFixed(2);
+    console.log(`✅ Updated totalMarginVariance input: ${totalMargin.toFixed(2)}%`);
+
+    // **Update Margin Container**
+    if (marginContainer) {
+        marginContainer.innerHTML = `
+            <p><strong>Client Name:</strong> ${clientName}</p>
+            <p><strong>Account Type:</strong> ${accountType}</p>
+            <p><strong>Client Base Margin:</strong> ${clientMargin}%</p>
+            <p><strong>Additional Margin from Selections:</strong> ${total}%</p>
+            <p><strong>Total Margin Variance:</strong> <span id="totalMarginValue">${totalMargin.toFixed(2)}%</span></p>
+        `;
+
+        marginContainer.style.display = "block";
     }
 }
+
+
+
+
+
+
 
 
 
