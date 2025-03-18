@@ -15,19 +15,10 @@
 <select id="vanirOffice">
     <option value="">Select an Office</option> <!-- Default empty option -->
 </select>
-
-       
-
-          <!-- Radio Buttons for Tier Selection -->
-          <div class="checkbox-container">
-            <h3>Tier Selection:</h3>
-            <div id="tierCheckboxes">Loading...</div>
-        </div>
-
       
 
      <!-- Client Name Dropdown (Initially Hidden) -->
- <div id="1clientNameContainer" style="display: none;">
+ <div id="clientNameContainer" style="display: none;">
     <h3>Client Name</h3>
     <select id="clientName">
         <option></option>
@@ -60,7 +51,11 @@
 
         <br>
         <br>
-
+        <p>Account Type: <span id="accountType"></span></p>
+        <p id="marginContainer" style="display: none;">
+            Margin: <span id="margin"></span>%
+        </p>
+        
       <!-- Total Margin Variance (Aligned in One Line) -->
 <div class="total-margin-container">
     <input type="text" id="totalMarginVariance" readonly value="0">

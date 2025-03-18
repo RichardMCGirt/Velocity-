@@ -33,9 +33,74 @@ document.addEventListener("DOMContentLoaded", function () {
             clientNameContainer.style.display = "none"; // Hide if nothing is selected
         }
     });
+    const clientDropdown = document.getElementById("clientName");
+    clientDropdown.addEventListener("change", updateMargin);
 });
 
 let fetchInProgress = {}; // Track ongoing fetch requests
+
+function updateMargin() {
+    const clientDropdown = document.getElementById("clientName");
+    
+    if (!clientDropdown) {
+        console.error("❌ Error: Client Name dropdown is missing.");
+        return;
+    }
+
+    const selectedOption = clientDropdown.options[clientDropdown.selectedIndex];
+
+    if (!selectedOption || !selectedOption.value) {
+        console.warn("⚠️ No client selected. Resetting values.");
+        document.getElementById("accountType").textContent = "-";
+        document.getElementById("margin").textContent = "-";
+        document.getElementById("totalMarginVariance").value = "0";
+        return;
+    }
+
+    const clientName = selectedOption.textContent.trim(); // Get client name
+    const accountType = selectedOption.dataset.accountType || "Unknown";
+
+    console.log("📌 Client Selected:");
+    console.log(`   ✅ Client Name: "${clientName}"`);
+    console.log(`   ✅ Account Type: "${accountType}"`);
+
+    let margin = 0;
+    let additionalMargin = 0;
+
+    // Assign base margin based on Account Type
+    switch (accountType) {
+        case "National":
+            margin = 10;
+            break;
+        case "Local Production":
+            margin = 11;
+            break;
+        case "Custom":
+            margin = 15;
+            break;
+        default:
+            console.warn(`⚠️ Unrecognized Account Type: ${accountType}`);
+    }
+
+    // **Special Case: If "Assurance Restoration", add 15% margin**
+    if (clientName === "Assurance Restoration") {
+        additionalMargin = 15;
+        console.log("🔹 Bonus Margin Applied: +15% for Assurance Restoration");
+    }
+
+    // Calculate total margin variance
+    let totalMargin = margin + additionalMargin;
+
+    // Update UI elements
+    document.getElementById("accountType").textContent = accountType;
+    document.getElementById("margin").textContent = `${margin}%`;
+    document.getElementById("totalMarginVariance").value = totalMargin.toFixed(2);
+
+    console.log(`   ✅ Total Margin Variance: ${totalMargin.toFixed(2)}%`);
+}
+
+
+
 
 async function getMarginVarianceFromAirtable(materialType) {
     if (!materialType || materialType.trim() === '') return null;
@@ -121,13 +186,13 @@ async function fetchData() {
 
         const data = await response.json();
         populateVanirOffices(data.records);
-        populateTierCheckboxes(data.records);
         
         // Fetch related data
         fetchProjectSizes();
         fetchLocation();
         fetchProjectType();
         fetchMaterial();
+        populateVanirOffices(data.records);
 
         document.getElementById('status').textContent = '';
 
@@ -166,19 +231,14 @@ async function fetchAllClientNames() {
         do {
             const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}?offset=${offset}`;
             const response = await fetch(url, {
-                headers: {
-                    Authorization: `Bearer ${airtableApiKey}`
-                }
-                            });
+                headers: { Authorization: `Bearer ${airtableApiKey}` }
+            });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch client names');
-            }
+            if (!response.ok) throw new Error('Failed to fetch client names');
 
             const data = await response.json();
             allClients = [...allClients, ...data.records]; // Store in global array
-
-            offset = data.offset || ''; // Continue fetching if there is an offset
+            offset = data.offset || ''; // Continue fetching if offset exists
         } while (offset);
 
         console.log(`✅ Loaded ${allClients.length} client names into memory.`);
@@ -199,31 +259,44 @@ function fetchClientNames() {
     // Filter clients based on selected Vanir Office
     const filteredClients = allClients
         .filter(record => record.fields.Division === selectedOffice)
-        .map(record => record.fields['Client Name']);
+        .map(record => ({
+            id: record.id,
+            name: record.fields['Client Name'],
+            accountType: record.fields['Account Type']
+        }));
 
     populateClientDropdown(filteredClients);
-} 
-
-
-
-function populateClientDropdown(clientNames) {
-    const dropdown = document.getElementById('clientName');
-    dropdown.innerHTML = '';
-
-    if (clientNames.length === 0) {
-        dropdown.innerHTML = '<option>No matching clients</option>';
-    } else {
-        // Sort client names alphabetically (A-Z)
-        clientNames.sort((a, b) => a.localeCompare(b));
-
-        clientNames.forEach(client => {
-            const option = document.createElement('option');
-            option.textContent = client;
-            option.value = client;
-            dropdown.appendChild(option);
-        });
-    }
 }
+
+
+
+function populateClientDropdown(clients) {
+    const dropdown = document.getElementById("clientName");
+
+    if (!dropdown) {
+        console.error("❌ Client Name dropdown not found.");
+        return;
+    }
+
+    dropdown.innerHTML = '<option value="">Select a client</option>'; 
+
+    if (clients.length === 0) {
+        console.warn("⚠️ No clients found for selected Vanir Office.");
+        dropdown.innerHTML = '<option value="">No matching clients</option>';
+        return;
+    }
+
+    clients.forEach(client => {
+        const option = document.createElement("option");
+        option.value = client.id; // Store record ID
+        option.textContent = client.name;
+        option.dataset.accountType = client.accountType || "Unknown";
+        dropdown.appendChild(option);
+    });
+
+    console.log(`✅ Populated ${clients.length} clients in dropdown.`);
+}
+
 
 
 async function fetchProjectSizes() {
@@ -579,28 +652,48 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    console.log("🚀 DOM fully loaded.");
+
     const clientNameContainer = document.getElementById("clientNameContainer");
     const vanirOfficeDropdown = document.getElementById("vanirOffice");
+    const clientDropdown = document.getElementById("clientName");
 
-    // Initially hide the Client Name section
-    if (clientNameContainer) {
-        clientNameContainer.style.display = "none";
-        console.log("✅ Client Name dropdown is initially hidden.");
-    } else {
-        console.error("❌ Error: Client Name container not found!");
+    // **Check if elements exist before proceeding**
+    if (!vanirOfficeDropdown) {
+        console.error("❌ Error: Vanir Office dropdown not found!");
+        return;
     }
 
-    // Show Client Name dropdown & Fetch Client Names when Vanir Office is selected
+    if (!clientNameContainer) {
+        console.error("❌ Error: Client Name container not found!");
+        return;
+    }
+
+    if (!clientDropdown) {
+        console.error("❌ Error: Client Name dropdown not found!");
+        return;
+    }
+
+    // **Initially hide the Client Name container**
+    clientNameContainer.style.display = "none";
+    console.log("✅ Client Name dropdown is initially hidden.");
+
+    // **Show Client Name dropdown & Fetch Clients when Vanir Office is selected**
     vanirOfficeDropdown.addEventListener("change", function () {
         if (vanirOfficeDropdown.value) {
             clientNameContainer.style.display = "block"; // Show the section
             console.log("✅ Client Name dropdown is now visible.");
-            fetchClientNames(); // ✅ Call fetchClientNames() to populate the dropdown
+            fetchClientNames(); // ✅ Fetch Client Names based on selected office
         } else {
-            clientNameContainer.style.display = "none"; // Hide dropdown if nothing is selected
+            clientNameContainer.style.display = "none"; // Hide if no office is selected
         }
     });
+
+    // **Attach Event Listener to Client Name Dropdown**
+    console.log("✅ Client Name dropdown found. Adding event listener.");
+    clientDropdown.addEventListener("change", updateMargin);
 });
+
 
 // **Calculate & Update Total Margin Variance**
 function updateTotalMarginVariance() {
