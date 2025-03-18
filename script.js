@@ -713,7 +713,6 @@ function updateTotalMarginVariance() {
     // Fetch required elements
     const clientDropdown = document.getElementById("clientName");
     const totalMarginInput = document.getElementById("totalMarginVariance");
-    const marginContainer = document.getElementById("marginContainer");
 
     if (!clientDropdown) {
         console.error("❌ Error: Client Name dropdown is missing.");
@@ -722,9 +721,6 @@ function updateTotalMarginVariance() {
     if (!totalMarginInput) {
         console.error("❌ Error: Element with ID 'totalMarginVariance' not found in the DOM.");
         return;
-    }
-    if (!marginContainer) {
-        console.warn("⚠️ Warning: Margin container not found. Proceeding without it.");
     }
 
     const selectedOption = clientDropdown.options[clientDropdown.selectedIndex];
@@ -744,18 +740,16 @@ function updateTotalMarginVariance() {
             case "National":
                 clientMargin = 10;
                 break;
-            case "Local Product":
+            case "Local Production":
                 clientMargin = 11;
                 break;
             case "Custom":
-                clientMargin = 15;  // ✅ Now correctly assigns 15%
+                clientMargin = 15;  
+                console.log("✅ Custom Account Type detected: +15% Base Margin Applied.");
                 break;
             default:
                 console.warn(`⚠️ Unrecognized Account Type: ${accountType}`);
         }
-
-        // **Special Case: If "Assurance Restoration", add 15% bonus margin**
-       
     } else {
         console.warn("⚠️ No client selected. Using default values.");
     }
@@ -774,45 +768,39 @@ function updateTotalMarginVariance() {
                 minMargin = total + clientMargin - 2;
                 maxMargin = total + clientMargin + 2;
                 break;
-            case "Local Product":
+            case "Local Production":
                 minMargin = total + clientMargin - 1;
                 maxMargin = total + clientMargin + 1;
                 break;
             case "Custom":
                 minMargin = Math.max(0, total + clientMargin - 1);
                 maxMargin = total + clientMargin + 2;
+                console.log(`✅ Custom Tier Adjustments: Min: ${minMargin}% | Max: ${maxMargin}%`);
                 break;
             default:
                 console.warn(`⚠️ Unknown tier label: ${tierLabel}`);
         }
     }
 
-    // **Fix: Ensure correct Custom min-max if no tier is selected**
+    // **Ensure correct Custom min-max if no tier is selected**
     if (accountType === "Custom" && !selectedTier) {
-        minMargin = Math.max(0, total + clientMargin - 0);
-        maxMargin = total + clientMargin + 0;
+        minMargin = Math.max(0, total + clientMargin - 1);
+        maxMargin = total + clientMargin + 2;
+        console.log(`✅ Custom Tier Default Adjustments: Min: ${minMargin}% | Max: ${maxMargin}%`);
     }
 
     // **Final total margin calculation**
     let totalMargin = total + clientMargin;
 
     // **Update UI Elements**
-    const accountTypeElement = document.getElementById("accountType");
-    if (accountTypeElement) {
-        accountTypeElement.textContent = accountType;
-    }
-    
-    const marginElement = document.getElementById("margin");
-    if (marginElement) {
-        marginElement.textContent = `${clientMargin}%`;
-    }
+    document.getElementById("accountType").textContent = accountType;
+    document.getElementById("margin").textContent = `${clientMargin}%`;
 
     // **Set the input field value**
     totalMarginInput.value = `Recommended Margin: ${totalMargin.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`;
     console.log(`✅ Updated totalMarginVariance input: ${totalMargin.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`);
-
-   
 }
+
 
 
 
