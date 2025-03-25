@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     const clientDropdown = document.getElementById("clientName");
     clientDropdown.addEventListener("change", updateMargin);
+    
 });
 
 let fetchInProgress = {}; // Track ongoing fetch requests
@@ -94,7 +95,7 @@ function updateMargin() {
     // Update UI elements
     document.getElementById("accountType").textContent = accountType;
     document.getElementById("margin").textContent = `${margin}%`;
-    document.getElementById("totalMarginVariance").value = totalMargin.toFixed(2);
+    document.getElementById("totalMarginVariance").value = `Recommended Margin: ${totalMargin.toFixed(2)}%`;
 
     console.log(`   ✅ Total Margin Variance: ${totalMargin.toFixed(2)}%`);
 }
@@ -278,24 +279,42 @@ function populateClientDropdown(clients) {
         return;
     }
 
-    dropdown.innerHTML = '<option value="">Select a client</option>'; 
+    dropdown.innerHTML = '<option value="">Select a client</option>';
 
     if (clients.length === 0) {
-        console.warn("⚠️ No clients found for selected Vanir Office.");
         dropdown.innerHTML = '<option value="">No matching clients</option>';
         return;
     }
 
+    // ✅ Sort clients alphabetically
+    clients.sort((a, b) => a.name.localeCompare(b.name));
+
     clients.forEach(client => {
         const option = document.createElement("option");
-        option.value = client.id; // Store record ID
+        option.value = client.id;
         option.textContent = client.name;
         option.dataset.accountType = client.accountType || "Unknown";
         dropdown.appendChild(option);
     });
 
-    console.log(`✅ Populated ${clients.length} clients in dropdown.`);
+    console.log(`✅ Populated ${clients.length} clients in dropdown (sorted).`);
+
+    // ✅ Re-initialize Tom Select after populating options
+    if (dropdown.tomselect) {
+        dropdown.tomselect.destroy(); // Remove old instance if it exists
+    }
+
+    new TomSelect("#clientName", {
+        create: false,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Select or search for a client"
+    });
 }
+
+
 
 
 

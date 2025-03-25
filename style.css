@@ -42,6 +42,29 @@ h3, select, .checkbox-container, .total-margin-container, input {
     text-align: center;
 }
 
+.ts-control {
+    width: 100% !important;
+    max-width: 300px; /* or whatever limit you want */
+}
+
+
+.ts-control {
+    padding: 8px;
+    line-height: 1.2;
+    justify-content: center !important;
+
+}
+
+.ts-control input {
+    padding: 0;
+    margin: 0;
+    text-indent: 0;
+    text-align: center !important;
+
+}
+
+
+
 /* Container: Ensuring it fits the viewport */
 .container {
     background: white;
@@ -65,10 +88,11 @@ select, input[type="text"] {
     padding: 8px;
     border-radius: 8px;
     border: 1px solid #ccc;
+    font-size: 25px;
     background-color: #fff;
-    width: 90%; /* Use available space without overflow */
-    max-width: 300px; /* Prevent from being too large */
+    width: fit-content; /* Use available space without overflow */
 }
+
 
 /* Button Container */
 .button-container {
