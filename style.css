@@ -63,8 +63,6 @@ h3, select, .checkbox-container, .total-margin-container, input {
 
 }
 
-
-
 /* Container: Ensuring it fits the viewport */
 .container {
     background: white;
@@ -199,12 +197,43 @@ input[type="radio"]:checked {
     visibility: hidden; /* Prevents unwanted flashes */
 }
 
-
-
+#marginKeyWrapper ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1em;
+  }
+  
+  #marginKeyWrapper li {
+    padding: 4px 0;
+  }
+  
+  #marginKeyWrapper strong {
+    color: #0074D9;
+  }
+  
+  #toggleMarginKey {
+    background-color: #0074D9;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  #toggleMarginKey:hover {
+    background-color: #005fa3;
+  }
+  
+  #marginKey > div {
+    margin-bottom: 1.5em;
+  }
+  
+  
 
 #resultsContainer {
-    min-height: 200px; /* Ensures visibility on small screens */
-    max-height: 60vh; /* Limits height to prevent excessive stretching */
+    min-height: 360px; /* Ensures visibility on small screens */
+    max-height: 70vh; /* Limits height to prevent excessive stretching */
     overflow-y: auto; /* Enables scrolling */
     width: 100%;
     border: 1px solid #ddd;

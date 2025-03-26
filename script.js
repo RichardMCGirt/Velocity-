@@ -224,8 +224,6 @@ function populateVanirOffices(records) {
     }
 }
 
-
-
 async function fetchAllClientNames() {
     let offset = '';
     try {
@@ -248,7 +246,6 @@ async function fetchAllClientNames() {
     }
 }
 
-
 function fetchClientNames() {
     const selectedOffice = document.getElementById('vanirOffice').value;
     
@@ -268,8 +265,6 @@ function fetchClientNames() {
 
     populateClientDropdown(filteredClients);
 }
-
-
 
 function populateClientDropdown(clients) {
     const dropdown = document.getElementById("clientName");
@@ -313,10 +308,6 @@ function populateClientDropdown(clients) {
         placeholder: "Select or search for a client"
     });
 }
-
-
-
-
 
 async function fetchProjectSizes() {
     const url = `https://api.airtable.com/v0/${baseId}/${projectSizeTableId}`;
@@ -366,7 +357,9 @@ async function fetchMaterial() {
 }
 function materialRadioButtons(records) {
     const container = document.getElementById('materialRadioButtons');
+    const keyContainer = document.getElementById('materialKey');
     container.innerHTML = '';
+    keyContainer.innerHTML = '<strong>Material Types:</strong><ul>';
 
     let materialData = [];
 
@@ -374,47 +367,36 @@ function materialRadioButtons(records) {
         if (record.fields['Material Type'] && record.fields['Margin Variance']) {
             materialData.push({
                 displayName: record.fields['Material Type'].trim(),
-                value: record.fields['Margin Variance'] // ✅ Correctly store numeric Margin Variance
+                value: record.fields['Margin Variance']
             });
         }
     });
 
-    console.log("✅ Material Types After Filtering:", materialData.map(m => `${m.displayName} (Value: ${m.value})`));
-
     materialData.sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-    if (materialData.length === 0) {
-        container.innerHTML = '<p>No materials available</p>';
-        return;
-    }
 
     const radioGroup = document.createElement('div');
     radioGroup.classList.add('radio-group');
 
     materialData.forEach(item => {
-        console.log(`Creating radio button: ${item.displayName} (Value: ${item.value})`);
-
         const label = document.createElement('label');
         label.classList.add('radio-label');
 
         const radio = document.createElement('input');
         radio.type = 'radio';
-        radio.value = item.value; // ✅ Now stores the numeric value (e.g., 3)
+        radio.value = item.value;
         radio.name = "materialSelection";
 
         label.appendChild(radio);
         label.appendChild(document.createTextNode(` ${item.displayName}`));
         radioGroup.appendChild(label);
+
+        // Add to key
+        keyContainer.innerHTML += `<li>${item.displayName}: <strong>${item.value}%</strong></li>`;
     });
 
     container.appendChild(radioGroup);
-
-    console.log("✅ Material radio buttons populated successfully.");
+    keyContainer.innerHTML += '</ul>';
 }
-
-
-
-
 
 
 async function fetchProjectType() {
@@ -473,28 +455,28 @@ document.getElementById('locationRadioButtons').innerHTML = '<p>Error loading lo
 
 
 function populateLocationRadioButtons(records) {
-    const container = document.getElementById('locationRadioButtons'); 
+    const container = document.getElementById('locationRadioButtons');
+    const keyContainer = document.getElementById('locationKey');
     container.innerHTML = '';
+    keyContainer.innerHTML = '<strong>Locations:</strong><ul>';
 
-    // ✅ Fix: Clear projectSizeData to prevent duplicates
     projectSizeData = [];
 
     records.forEach(record => {
         if (record.fields['Distance'] !== undefined && record.fields['Margin Variance'] !== undefined) {
             projectSizeData.push({
-                displayName: record.fields['Distance'], 
+                displayName: record.fields['Distance'],
                 value: record.fields['Margin Variance']
             });
         }
     });
 
-    // ✅ Fix: Remove duplicates using a Set
     projectSizeData = [...new Map(projectSizeData.map(item => [item.displayName, item])).values()];
-
-    projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName)); // Sort alphabetically
+    projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     if (projectSizeData.length === 0) {
         container.innerHTML = '<p>No location available</p>';
+        keyContainer.innerHTML += '<li>No locations found.</li></ul>';
         return;
     }
 
@@ -502,63 +484,71 @@ function populateLocationRadioButtons(records) {
         const label = document.createElement('label');
         const radio = document.createElement('input');
         radio.type = 'radio';
-        radio.value = item.value; // Store Margin Variance as value
+        radio.value = item.value;
         radio.name = "locationSelection";
 
         label.appendChild(radio);
-        label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Location
+        label.appendChild(document.createTextNode(` ${item.displayName}`));
         container.appendChild(label);
+
+        // Add to key
+        keyContainer.innerHTML += `<li>${item.displayName}: <strong>${item.value}%</strong></li>`;
     });
 
+    keyContainer.innerHTML += '</ul>';
     console.log("✅ Location radio buttons populated successfully, no duplicates.");
 }
 
 
-function populateProjecttypeRadioButtons(records) {
-    const container = document.getElementById('projectRadioButtons'); 
-    container.innerHTML = '';
 
-    let projectSizeData = [];
+function populateProjecttypeRadioButtons(records) {
+    const container = document.getElementById('projectRadioButtons');
+    const keyContainer = document.getElementById('projectTypeKey');
+    container.innerHTML = '';
+    keyContainer.innerHTML = '<strong>Project Types:</strong><ul>';
+
+    let projectTypeData = [];
 
     records.forEach(record => {
-        if (record.fields['Project Type'] !== undefined && record.fields['Margin Variance'] !== undefined) {
-            projectSizeData.push({
-                displayName: record.fields['Project Type'], 
+        if (record.fields['Project Type'] && record.fields['Margin Variance']) {
+            projectTypeData.push({
+                displayName: record.fields['Project Type'],
                 value: record.fields['Margin Variance']
             });
         }
     });
 
     // Sort with "Single Family" always on top
-    projectSizeData.sort((a, b) => {
-        if (a.displayName === "Single Family") return -1; // Move "Single Family" to top
+    projectTypeData.sort((a, b) => {
+        if (a.displayName === "Single Family") return -1;
         if (b.displayName === "Single Family") return 1;
-        return a.displayName.localeCompare(b.displayName); // Sort alphabetically
+        return a.displayName.localeCompare(b.displayName);
     });
 
-    if (projectSizeData.length === 0) {
+    if (projectTypeData.length === 0) {
         container.innerHTML = '<p>No Project Types available</p>';
+        keyContainer.innerHTML += '<li>No project types found.</li></ul>';
         return;
     }
 
-    projectSizeData.forEach(item => {
-        console.log(`Creating radio button: ${item.displayName} (Value: ${item.value})`);
+    projectTypeData.forEach(item => {
         const label = document.createElement('label');
         const radio = document.createElement('input');
         radio.type = 'radio';
-        radio.value = item.value; // Store Margin Variance as value
+        radio.value = item.value;
         radio.name = "projectTypeSelection";
 
         label.appendChild(radio);
-        label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Project Type
+        label.appendChild(document.createTextNode(` ${item.displayName}`));
         container.appendChild(label);
+
+        // Add to key
+        keyContainer.innerHTML += `<li>${item.displayName}: <strong>${item.value}%</strong></li>`;
     });
 
-    console.log("Project Type radio buttons populated successfully.");
+    keyContainer.innerHTML += '</ul>';
+    console.log("✅ Project Type radio buttons populated successfully.");
 }
-
-
-
 
 function populateTierCheckboxes(records) {
     const checkboxContainer = document.getElementById('tierCheckboxes');
@@ -604,16 +594,38 @@ function populateTierCheckboxes(records) {
     });
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const toggleButton = document.getElementById("toggleMarginKey");
+    const marginKey = document.getElementById("marginKey");
+
+    if (toggleButton && marginKey) {
+        toggleButton.addEventListener("click", () => {
+            if (marginKey.style.display === "none") {
+                marginKey.style.display = "block";
+                toggleButton.textContent = "📘 Hide Margin Key";
+            } else {
+                marginKey.style.display = "none";
+                toggleButton.textContent = "📘 Show Margin Key";
+            }
+        });
+    } else {
+        console.error("❌ Margin key toggle elements not found.");
+    }
+});
+
+
 function populateProjectSizeRadioButtons(records) {
     const container = document.getElementById('projectSizeRadioButtons');
+    const keyContainer = document.getElementById('projectSizeKey');
     container.innerHTML = '';
+    keyContainer.innerHTML = '<strong>Project Sizes:</strong><ul>';
 
     let projectSizeData = [];
 
     records.forEach(record => {
         if (record.fields['Project Size'] && record.fields['Margin Variance']) {
             projectSizeData.push({
-                displayName: record.fields['Project Size'], 
+                displayName: record.fields['Project Size'],
                 value: record.fields['Margin Variance']
             });
         }
@@ -623,36 +635,39 @@ function populateProjectSizeRadioButtons(records) {
     projectSizeData.sort((a, b) => {
         const numA = parseInt(a.displayName.split('-')[0].trim(), 10) || 0;
         const numB = parseInt(b.displayName.split('-')[0].trim(), 10) || 0;
-        return numA - numB; // Numeric comparison
+        return numA - numB;
     });
 
     if (projectSizeData.length === 0) {
         container.innerHTML = '<p>No project sizes available</p>';
+        keyContainer.innerHTML += '<li>No project sizes found.</li></ul>';
         return;
     }
 
-    // Create a flex container for alignment
     const radioGroup = document.createElement('div');
-    radioGroup.classList.add('radio-group'); // Ensures proper styling
+    radioGroup.classList.add('radio-group');
 
     projectSizeData.forEach(item => {
         const label = document.createElement('label');
-        label.classList.add('radio-label'); // Styling class
+        label.classList.add('radio-label');
 
         const radio = document.createElement('input');
         radio.type = 'radio';
-        radio.value = item.value; // Store Margin Variance as value
+        radio.value = item.value;
         radio.name = "projectSizeSelection";
 
         label.appendChild(radio);
-        label.appendChild(document.createTextNode(` ${item.displayName}`)); // Show Project Size
+        label.appendChild(document.createTextNode(` ${item.displayName}`));
         radioGroup.appendChild(label);
+
+        // Add to key
+        keyContainer.innerHTML += `<li>${item.displayName}: <strong>${item.value}%</strong></li>`;
     });
 
     container.appendChild(radioGroup);
-
-    console.log("Project Size radio buttons populated successfully.");
+    keyContainer.innerHTML += '</ul>';
 }
+
 
 
 // Attach event listeners to all radio buttons
@@ -671,10 +686,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("✅ Total Margin Container is hidden initially.");
     } else {
         console.error("❌ Error: Total Margin Container not found!");
-    }
-
-    
-    
+    } 
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -827,24 +839,11 @@ function updateTotalMarginVariance() {
     console.log(`✅ Updated totalMarginVariance input: ${totalMargin.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`);
 }
 
-
-
-
-
-
-
-
-
-
-
-
 // Attach event listeners to all radio buttons including tiers
 document.addEventListener('change', event => {
     if (event.target.type === 'radio') {
         updateTotalMarginVariance();
     }
 });
-
-
 
 fetchData();
