@@ -496,7 +496,6 @@ function populateLocationRadioButtons(records) {
     });
 
     keyContainer.innerHTML += '</ul>';
-    console.log("✅ Location radio buttons populated successfully, no duplicates.");
 }
 
 
@@ -513,7 +512,6 @@ function populateProjecttypeRadioButtons(records) {
         const projectType = record.fields['Project Type'];
         const marginVariance = record.fields['Margin Variance'];
 
-        console.log(`🔍 Record ${index}: Project Type = ${projectType}, Margin Variance = ${marginVariance}`);
 
         // Include zero values, exclude only null or undefined
         if (projectType !== undefined && projectType !== null &&
@@ -553,11 +551,9 @@ function populateProjecttypeRadioButtons(records) {
         container.appendChild(label);
 
         keyContainer.innerHTML += `<li>${item.displayName}: <strong>${item.value}%</strong></li>`;
-        console.log(`✅ Added radio for "${item.displayName}" with value: ${item.value}`);
     });
 
     keyContainer.innerHTML += '</ul>';
-    console.log("✅ Project Type radio buttons populated successfully.");
 }
 
 
