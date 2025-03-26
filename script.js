@@ -224,47 +224,68 @@ function populateVanirOffices(records) {
     }
 }
 
+
 async function fetchAllClientNames() {
+    allClients = []; // ✅ Clear before refetching
+
     let offset = '';
     try {
+        console.log("🔄 Starting to fetch client names from Airtable...");
         do {
             const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}?offset=${offset}`;
+            console.log(`📡 Fetching from URL: ${url}`);
+            
             const response = await fetch(url, {
                 headers: { Authorization: `Bearer ${airtableApiKey}` }
             });
 
-            if (!response.ok) throw new Error('Failed to fetch client names');
+            if (!response.ok) throw new Error(`Failed to fetch client names. Status: ${response.status}`);
 
             const data = await response.json();
-            allClients = [...allClients, ...data.records]; // Store in global array
-            offset = data.offset || ''; // Continue fetching if offset exists
+            console.log(`📥 Retrieved ${data.records.length} records`);
+
+            // ✅ Filter out records with Account Type = "Commercial"
+            const filtered = data.records.filter(record => record.fields['Account Type'] !== 'Commercial');
+
+            console.log(`🧹 Filtered to ${filtered.length} non-commercial records`);
+
+            allClients = [...allClients, ...filtered];
+            offset = data.offset || '';
         } while (offset);
 
-        console.log(`✅ Loaded ${allClients.length} client names into memory.`);
+        console.log(`✅ Finished loading. Total non-commercial clients fetched: ${allClients.length}`);
     } catch (error) {
         console.error("❌ Error fetching clients:", error);
     }
 }
 
+
 function fetchClientNames() {
     const selectedOffice = document.getElementById('vanirOffice').value;
+    console.log(`🏢 Selected Office: ${selectedOffice}`);
     
     if (!selectedOffice) {
+        console.warn("⚠️ No office selected. Aborting client filtering.");
         document.getElementById('clientName').innerHTML = '<option>No office selected</option>';
         return;
     }
 
     // Filter clients based on selected Vanir Office
     const filteredClients = allClients
-        .filter(record => record.fields.Division === selectedOffice)
-        .map(record => ({
+    .filter(record => {
+        const division = record.fields.Division || '';
+        return division.toLowerCase().includes(selectedOffice.toLowerCase());
+    })
+            .map(record => ({
             id: record.id,
             name: record.fields['Client Name'],
             accountType: record.fields['Account Type']
         }));
 
+    console.log(`🔎 Found ${filteredClients.length} matching clients for division '${selectedOffice}'`);
     populateClientDropdown(filteredClients);
 }
+
 
 function populateClientDropdown(clients) {
     const dropdown = document.getElementById("clientName");
