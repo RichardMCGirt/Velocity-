@@ -12,7 +12,26 @@
 
     </head>
     
-<body>
+    <body>
+        <script>
+            const correctPassword = "duck soup";
+          
+            // Check localStorage for auth
+            if (localStorage.getItem("authenticated") !== "true") {
+              const userInput = prompt("Enter password to access this page:");
+              if (userInput === correctPassword) {
+                localStorage.setItem("authenticated", "true");
+                alert("Access granted. You won't be asked again unless you clear your browser data.");
+              } else {
+                alert("Incorrect password. Redirecting...");
+                window.location.href = "https://www.google.com";
+              }
+            }
+          </script>
+        
+        
+
+
     <div class="container">
 
       <!-- Vanir Office Dropdown -->
