@@ -509,12 +509,21 @@ function populateProjecttypeRadioButtons(records) {
 
     let projectTypeData = [];
 
-    records.forEach(record => {
-        if (record.fields['Project Type'] && record.fields['Margin Variance']) {
+    records.forEach((record, index) => {
+        const projectType = record.fields['Project Type'];
+        const marginVariance = record.fields['Margin Variance'];
+
+        console.log(`🔍 Record ${index}: Project Type = ${projectType}, Margin Variance = ${marginVariance}`);
+
+        // Include zero values, exclude only null or undefined
+        if (projectType !== undefined && projectType !== null &&
+            marginVariance !== undefined && marginVariance !== null) {
             projectTypeData.push({
-                displayName: record.fields['Project Type'],
-                value: record.fields['Margin Variance']
+                displayName: projectType,
+                value: marginVariance
             });
+        } else {
+            console.warn(`⚠️ Skipped record ${index} due to missing Project Type or Margin Variance.`);
         }
     });
 
@@ -528,10 +537,11 @@ function populateProjecttypeRadioButtons(records) {
     if (projectTypeData.length === 0) {
         container.innerHTML = '<p>No Project Types available</p>';
         keyContainer.innerHTML += '<li>No project types found.</li></ul>';
+        console.warn("⚠️ No valid Project Types found to display.");
         return;
     }
 
-    projectTypeData.forEach(item => {
+    projectTypeData.forEach((item, idx) => {
         const label = document.createElement('label');
         const radio = document.createElement('input');
         radio.type = 'radio';
@@ -542,13 +552,14 @@ function populateProjecttypeRadioButtons(records) {
         label.appendChild(document.createTextNode(` ${item.displayName}`));
         container.appendChild(label);
 
-        // Add to key
         keyContainer.innerHTML += `<li>${item.displayName}: <strong>${item.value}%</strong></li>`;
+        console.log(`✅ Added radio for "${item.displayName}" with value: ${item.value}`);
     });
 
     keyContainer.innerHTML += '</ul>';
     console.log("✅ Project Type radio buttons populated successfully.");
 }
+
 
 function populateTierCheckboxes(records) {
     const checkboxContainer = document.getElementById('tierCheckboxes');
