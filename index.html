@@ -1,138 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <title>Velocity</title>
-        <link rel="stylesheet" href="style.css">
-        <!-- Tom Select CSS -->
-<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-<!-- Tom Select JS -->
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Velocity</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Tom Select CSS & JS -->
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    </head>
-    
-    <body>
-      <script>
-        const correctPassword = "duck soup";
-      
-        if (localStorage.getItem("authenticated") !== "true") {
-          const userInput = prompt("Enter password to access this page:");
-          if (userInput === correctPassword) {
-            localStorage.setItem("authenticated", "true");
-          } else {
-            document.body.innerHTML = "<h1>Access Denied</h1>";
-            throw new Error("Unauthorized access");
-          }
+  <style>
+    #authOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: black;
+      color: white;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    #authOverlay input {
+      padding: 10px;
+      font-size: 18px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: none;
+      width: 250px;
+      text-align: center;
+    }
+  
+    #authOverlay button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  
+    #authOverlay .error {
+      margin-top: 10px;
+      color: red;
+      font-size: 14px;
+    }
+  </style>
+  
+  <script>
+    const correctPassword = "duck soup";
+  
+    function showCustomPasswordPrompt() {
+      const overlay = document.createElement("div");
+      overlay.id = "authOverlay";
+  
+      overlay.innerHTML = `
+        <h2>Enter Password</h2>
+        <input type="password" id="passwordInput" placeholder="Password" autofocus />
+        <button id="submitPassword">Unlock</button>
+        <div class="error" id="errorMsg" style="display: none;">Incorrect password. Try again.</div>
+      `;
+  
+      document.body.appendChild(overlay);
+  
+      const input = overlay.querySelector("#passwordInput");
+      const button = overlay.querySelector("#submitPassword");
+      const error = overlay.querySelector("#errorMsg");
+  
+      function tryAuth() {
+        const entered = input.value.trim();
+        if (entered === correctPassword) {
+          localStorage.setItem("authenticated", "true");
+          overlay.remove();
+        } else {
+          error.style.display = "block";
+          input.value = "";
+          input.focus();
         }
-      </script>
-      
-        
-        
+      }
+  
+      button.onclick = tryAuth;
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") tryAuth();
+      });
+    }
+  
+    if (localStorage.getItem("authenticated") !== "true") {
+      window.addEventListener("DOMContentLoaded", showCustomPasswordPrompt);
+    }
+  </script>
+  
+  
+  
+  
+  
+</head>
 
+<body>
+  <div class="container">
 
-    <div class="container">
-
-      <!-- Vanir Office Dropdown -->
-<h3>Vanir Office</h3>
-<select id="vanirOffice">
-    <option value="">Select an Office</option> <!-- Default empty option -->
-</select>
-      
-
-     <!-- Client Name Dropdown (Initially Hidden) -->
- <div id="clientNameContainer" style="display: none;">
-    <h3>Client Name</h3>
-    <select id="clientName">
-        <option></option>
+    <h3>Vanir Office</h3>
+    <select id="vanirOffice">
+      <option value="">Select an Office</option>
     </select>
-</div> 
 
-       
+    <div id="clientNameContainer" style="display: none;">
+      <h3>Client Name</h3>
+      <select id="clientName">
+        <option></option>
+      </select>
+    </div>
 
-        <!-- Radio Buttons for Project Size (Stores Margin Variance) -->
-        <div class="checkbox-container">
-            <h3>Project Size</h3>
-            <div id="projectSizeRadioButtons">Loading...</div>
-        </div>
+    <div class="checkbox-container">
+      <h3>Project Size</h3>
+      <div id="projectSizeRadioButtons">Loading...</div>
+    </div>
 
-          <!-- Radio Buttons for Project Size (Stores Locations) -->
-          <div class="checkbox-container">
-            <h3>Location Distance:</h3>
-            <div id="locationRadioButtons">Loading...</div>
-        </div>
+    <div class="checkbox-container">
+      <h3>Location Distance:</h3>
+      <div id="locationRadioButtons">Loading...</div>
+    </div>
 
-        <div class="checkbox-container">
-            <h3>Project Type</h3>
-            <div id="projectRadioButtons">Loading...</div>
-        </div>
+    <div class="checkbox-container">
+      <h3>Project Type</h3>
+      <div id="projectRadioButtons">Loading...</div>
+    </div>
 
-        <div class="checkbox-container">
-            <h3>Material Used</h3>
-            <div id="materialRadioButtons">Loading...</div>
-        </div>
+    <div class="checkbox-container">
+      <h3>Material Used</h3>
+      <div id="materialRadioButtons">Loading...</div>
+    </div>
 
-        <br>
-        <br>
-        <p id="accountTypeContainer" style="display: none;">Account Type: <span id="accountType"></span></p>
-        <p id="marginContainer" style="display: none;">
-            Margin: <span id="margin"></span>%
-        </p>
-        
-      <!-- Total Margin Variance (Aligned in One Line) -->
-<div class="total-margin-container">
-    <input type="text" id="totalMarginVariance" readonly value="0">
-</div>
-<br>
+    <br><br>
+    <p id="accountTypeContainer" style="display: none;">Account Type: <span id="accountType"></span></p>
+    <p id="marginContainer" style="display: none;">Margin: <span id="margin"></span>%</p>
 
-<div id="sortingControlsContainer" class="sorting-buttons">
-    <button onclick="sortResults('alphabetical')">Sort A-Z</button>
-    <button onclick="sortResults('priceAsc')">Sort by Price ↑</button>
-    <button onclick="sortResults('priceDesc')">Sort by Price ↓</button>
-</div>
+    <div class="total-margin-container">
+      <input type="text" id="totalMarginVariance" readonly value="0">
+    </div>
+    <br>
 
-<div id="resultsContainer"></div>
+    <div id="sortingControlsContainer" class="sorting-buttons">
+      <button onclick="sortResults('alphabetical')">Sort A-Z</button>
+      <button onclick="sortResults('priceAsc')">Sort by Price ↑</button>
+      <button onclick="sortResults('priceDesc')">Sort by Price ↓</button>
+    </div>
 
-<div id="marginKeyWrapper" style="margin-top: 2em; display: none;">
-    <button id="toggleMarginKey" style="margin-bottom: 10px;">Show Margin Key</button>
-    <div id="marginKey" style="display: none; transition: max-height 0.3s ease-out; overflow: hidden;">
-      <h3>📘 Margin Key</h3>
-  
-      <div id="clientMarginKey">
-        <strong>Client Account Types:</strong>
-        <ul>
+    <div id="resultsContainer"></div>
+
+    <div id="marginKeyWrapper" style="margin-top: 2em; display: none;">
+      <button id="toggleMarginKey" style="margin-bottom: 10px;">Show Margin Key</button>
+      <div id="marginKey" style="display: none; transition: max-height 0.3s ease-out; overflow: hidden;">
+        <h3>📘 Margin Key</h3>
+        <div id="clientMarginKey">
+          <strong>Client Account Types:</strong>
+          <ul>
             <li>Commercial: <strong>0%</strong></li>
-          <li>National: <strong>10%</strong></li>
-          <li>Local Production: <strong>11%</strong></li>
-          <li>Custom: <strong>15%</strong></li>
-        </ul>
+            <li>National: <strong>10%</strong></li>
+            <li>Local Production: <strong>11%</strong></li>
+            <li>Custom: <strong>15%</strong></li>
+          </ul>
+        </div>
+        <div id="materialKey"></div>
+        <br>
+        <div id="projectSizeKey"></div>
+        <div id="locationKey"></div>
+        <div id="projectTypeKey"></div>
       </div>
-  
-      <div id="materialKey"></div>
-      <br>
-      <div id="projectSizeKey"></div>
-      <div id="locationKey"></div>
-      <div id="projectTypeKey"></div>
     </div>
+
+    <p id="status" class="loading"></p>
   </div>
-  
-  
-  
 
+  <!-- ✅ Logout Button for Testing -->
+  <div style="margin: 2em; text-align: center;">
+    <button onclick="localStorage.removeItem('authenticated'); location.reload();">
+      🔐 Logout
+    </button>
+  </div>
 
-        <p id="status" class="loading"></p>
-    </div>
-
-    <script src="script.js"></script> 
-    
-    <script src="filter.js"></script>
-<script>
-
-
-
-
-</script>
-
+  <!-- Scripts -->
+  <script src="script.js"></script> 
+  <script src="filter.js"></script>
 </body>
-
 </html>
