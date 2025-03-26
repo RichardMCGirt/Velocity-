@@ -8,6 +8,7 @@ const locationTableId = 'tblyDCOuu9IhypEW9'; // Table for Project Size (Stores M
 const projecttypeTableId = 'tblkgM96KX0j1jnYt'; // Table for Project Size (Stores Margin Variance)
 const materialTableId = 'tbllwD5cOKgjFFk3U'; // Table for Material (Stores Margin Variance)
 let projectSizeData = [];
+const totalMarginContainer = document.getElementById("totalMarginVariance");
 
 const fieldName = 'Office Name'; 
 const tierFields = ['Tier 1 Base', 'Tier 2 Base', 'Tier 3 Base']; 
@@ -706,9 +707,10 @@ document.addEventListener('change', event => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    const totalMarginContainer = document.querySelector("totalMarginVariance");
-    
-    // Initially hide the container
+    const totalMarginContainer = document.getElementById("totalMarginVariance");
+    if (totalMarginContainer) {
+        totalMarginContainer.style.display = "block";
+    }
     if (totalMarginContainer) {
         totalMarginContainer.style.display = "none";
         console.log("✅ Total Margin Container is hidden initially.");
@@ -716,6 +718,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("❌ Error: Total Margin Container not found!");
     } 
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("🚀 DOM fully loaded.");
@@ -779,6 +782,16 @@ function updateTotalMarginVariance() {
     // Fetch required elements
     const clientDropdown = document.getElementById("clientName");
     const totalMarginInput = document.getElementById("totalMarginVariance");
+
+    const totalMarginContainer = document.getElementById("totalMarginVariance");
+    if (totalMarginContainer) {
+        totalMarginContainer.style.display = "block";
+    }
+
+    if (!clientDropdown || !totalMarginInput) {
+        console.error("❌ Missing required elements.");
+        return;
+    }
 
     if (!clientDropdown) {
         console.error("❌ Error: Client Name dropdown is missing.");
