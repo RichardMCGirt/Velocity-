@@ -84,11 +84,7 @@ function updateMargin() {
             console.warn(`⚠️ Unrecognized Account Type: ${accountType}`);
     }
 
-    // **Special Case: If "Assurance Restoration", add 15% margin**
-    if (clientName === "Assurance Restoration") {
-        additionalMargin = 15;
-        console.log("🔹 Bonus Margin Applied: +15% for Assurance Restoration");
-    }
+
 
     // Calculate total margin variance
     let totalMargin = margin + additionalMargin;
@@ -98,7 +94,6 @@ function updateMargin() {
     document.getElementById("margin").textContent = `${margin}%`;
     document.getElementById("totalMarginVariance").value = `Recommended Margin: ${totalMargin.toFixed(2)}%`;
 
-    console.log(`   ✅ Total Margin Variance: ${totalMargin.toFixed(2)}%`);
     updateTotalMarginVariance(); // ← Add this!
 
 }
@@ -150,7 +145,6 @@ document.body.addEventListener("change", async function (event) {
         const selectedMaterial = event.target.value.trim();
 
         if (previousSelections[selectedMaterial]) {
-            console.log(`🔄 Using stored margin variance for ${selectedMaterial}: ${previousSelections[selectedMaterial]}`);
             event.target.value = previousSelections[selectedMaterial];
             updateTotalMarginVariance();
             return;
@@ -164,7 +158,6 @@ document.body.addEventListener("change", async function (event) {
         }
 
         previousSelections[selectedMaterial] = marginVariance; // Store the fetched value
-        console.log(`📊 Storing Margin Variance for ${selectedMaterial}: ${marginVariance}`);
 
         event.target.value = marginVariance;
         updateTotalMarginVariance();
@@ -236,7 +229,6 @@ async function fetchAllClientNames() {
         console.log("🔄 Starting to fetch client names from Airtable...");
         do {
             const url = `https://api.airtable.com/v0/${baseId}/${clientTableId}?offset=${offset}`;
-            console.log(`📡 Fetching from URL: ${url}`);
             
             const response = await fetch(url, {
                 headers: { Authorization: `Bearer ${airtableApiKey}` }
@@ -245,7 +237,6 @@ async function fetchAllClientNames() {
             if (!response.ok) throw new Error(`Failed to fetch client names. Status: ${response.status}`);
 
             const data = await response.json();
-            console.log(`📥 Retrieved ${data.records.length} records`);
 
             // ✅ Filter out records with Account Type = "Commercial"
             const filtered = data.records.filter(record => record.fields['Account Type'] !== 'Commercial');
@@ -265,7 +256,6 @@ async function fetchAllClientNames() {
 
 function fetchClientNames() {
     const selectedOffice = document.getElementById('vanirOffice').value;
-    console.log(`🏢 Selected Office: ${selectedOffice}`);
     
     if (!selectedOffice) {
         console.warn("⚠️ No office selected. Aborting client filtering.");
@@ -448,7 +438,6 @@ async function fetchProjectType() {
 
 async function fetchLocation() {
 const url = `https://api.airtable.com/v0/${baseId}/${locationTableId}`;
-console.log(`Fetching locations from: ${url}`); // Log API URL
 
 try {
 const response = await fetch(url, {
@@ -464,7 +453,6 @@ if (!response.ok) {
 const data = await response.json();
 
 if (data.records.length === 0) {
-    console.log("No locations found in Airtable.");
 } else {
     console.log(`Total locations retrieved: ${data.records.length}`);
 }
@@ -715,7 +703,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (totalMarginContainer) {
         totalMarginContainer.style.display = "none";
-        console.log("✅ Total Margin Container is hidden initially.");
     } else {
         console.error("❌ Error: Total Margin Container not found!");
     } 
@@ -723,7 +710,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("🚀 DOM fully loaded.");
 
     const clientNameContainer = document.getElementById("clientNameContainer");
     const vanirOfficeDropdown = document.getElementById("vanirOffice");
@@ -747,13 +733,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // **Initially hide the Client Name container**
     clientNameContainer.style.display = "none";
-    console.log("✅ Client Name dropdown is initially hidden.");
 
     // **Show Client Name dropdown & Fetch Clients when Vanir Office is selected**
     vanirOfficeDropdown.addEventListener("change", function () {
         if (vanirOfficeDropdown.value) {
             clientNameContainer.style.display = "block"; // Show the section
-            console.log("✅ Client Name dropdown is now visible.");
             fetchClientNames(); // ✅ Fetch Client Names based on selected office
         } else {
             clientNameContainer.style.display = "none"; // Hide if no office is selected
@@ -761,20 +745,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // **Attach Event Listener to Client Name Dropdown**
-    console.log("✅ Client Name dropdown found. Adding event listener.");
     clientDropdown.addEventListener("change", updateMargin);
 });
 
 
 function updateTotalMarginVariance() {
     let total = 0;
-    console.log("🔍 Updating Total Margin Variance...");
 
     // Sum up selected radio button values
     document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
         const value = parseFloat(radio.value);
         if (!isNaN(value)) {
-            console.log(`✅ Selected: ${radio.name} -> Value: ${value}`);
             total += value;
         } else {
             console.warn(`⚠️ Invalid value detected for ${radio.name}: ${radio.value}`);
@@ -814,7 +795,6 @@ function updateTotalMarginVariance() {
     if (selectedOption && selectedOption.value) {
         clientName = selectedOption.textContent.trim();
         accountType = (selectedOption.dataset.accountType || "Unknown").trim();
-        console.log(`🎯 Client Selected: ${clientName}, Account Type: ${accountType}`);
 
         // Assign base margin based on Account Type
         switch (accountType) {
@@ -851,7 +831,6 @@ function updateTotalMarginVariance() {
         case "Custom":
             minMargin = Math.max(0, total + clientMargin - 1);
             maxMargin = total + clientMargin + 2;
-            console.log(`✅ Custom Tier Adjustments: Min: ${minMargin}% | Max: ${maxMargin}%`);
             break;
         default:
             console.warn(`⚠️ Unknown account type: ${accountType}`);
@@ -873,7 +852,6 @@ function updateTotalMarginVariance() {
 
     // **Set the input field value**
     totalMarginInput.value = `Recommended Margin: ${totalMargin.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`;
-    console.log(`✅ Updated totalMarginVariance input: ${totalMargin.toFixed(2)}% (Range: ${minMargin.toFixed(2)}% - ${maxMargin.toFixed(2)}%)`);
 }
 
 // Attach event listeners to all radio buttons including tiers

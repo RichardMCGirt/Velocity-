@@ -93,7 +93,6 @@
             dropdown.appendChild(option);
         });
 
-        console.log("✅ Vanir Offices Populated:", officeNames);
     }
 
     function populateSidingStyle(records) {
