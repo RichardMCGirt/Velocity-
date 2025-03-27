@@ -141,27 +141,54 @@
 
     function filterResults() {
         console.log("🔍 Running filterResults...");
-
-        const selectedOffice = document.getElementById("vanirOffice").value.trim();
+    
+        const selectedOffice = document.getElementById("vanirOffice").value.trim().toLowerCase();
         const selectedSidingStyleValue = document.querySelector('#materialRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
         const selectedProjectTypeValue = document.querySelector('#projectRadioButtons input[type="radio"]:checked')?.value?.trim() || '';
-
+    
         const selectedSidingStyle = materialMapping[selectedSidingStyleValue] || selectedSidingStyleValue;
         const selectedProjectType = projectTypeMapping[selectedProjectTypeValue] || selectedProjectTypeValue;
-
-        const filteredRecords = allRecords.filter(record => {
+    
+        let filteredRecords = allRecords.filter(record => {
             const office = (record.fields?.['Vanir Offices'] || '').trim().toLowerCase();
+            const branch = (record.fields?.['Branches'] || '').trim().toLowerCase();
             const siding = (record.fields?.['Siding Style'] || '').trim().replace(/"/g, '');
             const type = (record.fields?.['Type'] || '').trim().replace(/"/g, '');
-
-            return (!selectedOffice || office === selectedOffice.toLowerCase()) &&
-                   (!selectedSidingStyle || siding.toLowerCase() === selectedSidingStyle.toLowerCase()) &&
-                   (!selectedProjectType || type.toLowerCase() === selectedProjectType.toLowerCase());
+            const recordClass = (record.fields?.['Class'] || '').trim().toLowerCase();
+    
+            const matchesOffice = !selectedOffice || office === selectedOffice || branch === selectedOffice;
+            const matchesSiding = !selectedSidingStyle || siding.toLowerCase() === selectedSidingStyle.toLowerCase();
+            const matchesType = !selectedProjectType || type.toLowerCase() === selectedProjectType.toLowerCase();
+    
+            return matchesOffice && matchesSiding && matchesType;
         });
-
+    
+        // If Hard Siding is selected, include records where Class === Paint
+        if (selectedSidingStyle.toLowerCase() === "hard siding") {
+            const paintClassRecords = allRecords.filter(record => {
+                const office = (record.fields?.['Vanir Offices'] || '').trim().toLowerCase();
+                const branch = (record.fields?.['Branches'] || '').trim().toLowerCase();
+                const recordClass = (record.fields?.['Class'] || '').trim().toLowerCase();
+    
+                const matchesOffice = !selectedOffice || office === selectedOffice || branch === selectedOffice;
+                return recordClass === "paint" && matchesOffice;
+            });
+    
+            // Merge and remove duplicates
+            const combined = [...filteredRecords, ...paintClassRecords];
+            const seen = new Set();
+            filteredRecords = combined.filter(record => {
+                const id = record.id;
+                if (seen.has(id)) return false;
+                seen.add(id);
+                return true;
+            });
+        }
+    
         console.log("✅ Filtered Records Count:", filteredRecords.length);
         displayResults(filteredRecords);
     }
+    
 
     function displayResults(records) {
         const container = document.getElementById('resultsContainer');
