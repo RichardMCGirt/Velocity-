@@ -84,8 +84,6 @@ function updateMargin() {
             console.warn(`⚠️ Unrecognized Account Type: ${accountType}`);
     }
 
-
-
     // Calculate total margin variance
     let totalMargin = margin + additionalMargin;
 
@@ -97,9 +95,6 @@ function updateMargin() {
     updateTotalMarginVariance(); // ← Add this!
 
 }
-
-
-
 
 async function getMarginVarianceFromAirtable(materialType) {
     if (!materialType || materialType.trim() === '') return null;
@@ -136,8 +131,6 @@ async function getMarginVarianceFromAirtable(materialType) {
     }
 }
 
-
-
 let previousSelections = {};
 
 document.body.addEventListener("change", async function (event) {
@@ -153,7 +146,6 @@ document.body.addEventListener("change", async function (event) {
         let marginVariance = await getMarginVarianceFromAirtable(selectedMaterial);
 
         if (marginVariance === null) {
-            console.warn(`⚠️ No valid margin variance found for ${selectedMaterial}. Keeping previous value.`);
             return;
         }
 
@@ -163,12 +155,6 @@ document.body.addEventListener("change", async function (event) {
         updateTotalMarginVariance();
     }
 });
-
-
-
-
-
-
 
 // **Fetch Vanir Offices & Project Data**
 async function fetchData() {
@@ -220,7 +206,6 @@ function populateVanirOffices(records) {
     }
 }
 
-
 async function fetchAllClientNames() {
     allClients = []; // ✅ Clear before refetching
 
@@ -252,7 +237,6 @@ async function fetchAllClientNames() {
         console.error("❌ Error fetching clients:", error);
     }
 }
-
 
 function fetchClientNames() {
     const selectedOffice = document.getElementById('vanirOffice').value;
@@ -331,7 +315,6 @@ async function fetchProjectSizes() {
             headers: {
                 Authorization: `Bearer ${airtableApiKey}`
             }
-            
         });
 
         if (!response.ok) {
@@ -339,13 +322,23 @@ async function fetchProjectSizes() {
         }
 
         const data = await response.json();
+
+        console.log(`📦 Raw Project Size Records Fetched: ${data.records.length}`);
+        data.records.forEach((record, idx) => {
+            console.log(`➡️ Record ${idx + 1}:`, {
+                'Project Size': record.fields['Project Size'],
+                'Margin Variance': record.fields['Margin Variance']
+            });
+        });
+
         populateProjectSizeRadioButtons(data.records);
 
     } catch (error) {
-        console.error(error);
+        console.error("❌ Error fetching project sizes:", error);
         document.getElementById('projectSizeRadioButtons').innerHTML = '<p>Error loading project sizes</p>';
     }
 }
+
 
 async function fetchMaterial() {
     const url = `https://api.airtable.com/v0/${baseId}/${materialTableId}`;
@@ -369,6 +362,7 @@ async function fetchMaterial() {
         document.getElementById('materialsRadioButtons').innerHTML = '<p>Error loading materials</p>';
     }
 }
+
 function materialRadioButtons(records) {
     const container = document.getElementById('materialRadioButtons');
     const keyContainer = document.getElementById('materialKey');
@@ -411,7 +405,6 @@ function materialRadioButtons(records) {
     container.appendChild(radioGroup);
     keyContainer.innerHTML += '</ul>';
 }
-
 
 async function fetchProjectType() {
     const url = `https://api.airtable.com/v0/${baseId}/${projecttypeTableId}`;
@@ -465,7 +458,6 @@ document.getElementById('locationRadioButtons').innerHTML = '<p>Error loading lo
 }
 }
 
-
 function populateLocationRadioButtons(records) {
     const container = document.getElementById('locationRadioButtons');
     const keyContainer = document.getElementById('locationKey');
@@ -475,15 +467,23 @@ function populateLocationRadioButtons(records) {
     projectSizeData = [];
 
     records.forEach(record => {
-        if (record.fields['Distance'] !== undefined && record.fields['Margin Variance'] !== undefined) {
+        const distance = record.fields['Distance'];
+        const variance = record.fields['Margin Variance'];
+
+        if (distance !== undefined && variance !== undefined) {
             projectSizeData.push({
-                displayName: record.fields['Distance'],
-                value: record.fields['Margin Variance']
+                displayName: distance,
+                value: variance
             });
         }
     });
 
+    console.log('Total matching records:', projectSizeData.length);
+
+    // Remove duplicates by Distance (optional)
     projectSizeData = [...new Map(projectSizeData.map(item => [item.displayName, item])).values()];
+    console.log('After deduplication:', projectSizeData.length);
+
     projectSizeData.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     if (projectSizeData.length === 0) {
@@ -494,22 +494,21 @@ function populateLocationRadioButtons(records) {
 
     projectSizeData.forEach(item => {
         const label = document.createElement('label');
+        label.style.display = 'block'; // ensures they stack visibly
         const radio = document.createElement('input');
         radio.type = 'radio';
-        radio.value = item.value;
+        radio.value = String(item.value); // Ensures even 0 becomes "0"
         radio.name = "locationSelection";
 
         label.appendChild(radio);
         label.appendChild(document.createTextNode(` ${item.displayName}`));
         container.appendChild(label);
 
-        // Add to key
         keyContainer.innerHTML += `<li>${item.displayName}: <strong>${item.value}%</strong></li>`;
     });
 
     keyContainer.innerHTML += '</ul>';
 }
-
 
 
 function populateProjecttypeRadioButtons(records) {
@@ -567,7 +566,6 @@ function populateProjecttypeRadioButtons(records) {
 
     keyContainer.innerHTML += '</ul>';
 }
-
 
 function populateTierCheckboxes(records) {
     const checkboxContainer = document.getElementById('tierCheckboxes');
@@ -632,7 +630,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-
 function populateProjectSizeRadioButtons(records) {
     const container = document.getElementById('projectSizeRadioButtons');
     const keyContainer = document.getElementById('projectSizeKey');
@@ -642,20 +639,31 @@ function populateProjectSizeRadioButtons(records) {
     let projectSizeData = [];
 
     records.forEach(record => {
-        if (record.fields['Project Size'] && record.fields['Margin Variance']) {
+        const size = record.fields['Project Size'];
+        const variance = record.fields['Margin Variance'];
+
+        if (
+            size !== undefined && size !== null && size !== '' &&
+            variance !== undefined && variance !== null
+        ) {
             projectSizeData.push({
-                displayName: record.fields['Project Size'],
-                value: record.fields['Margin Variance']
+                displayName: size,
+                value: variance
             });
+        } else {
+            console.warn('⚠️ Skipped record:', { size, variance });
         }
     });
 
-    // Sort numerically by the number before the hyphen
-    projectSizeData.sort((a, b) => {
-        const numA = parseInt(a.displayName.split('-')[0].trim(), 10) || 0;
-        const numB = parseInt(b.displayName.split('-')[0].trim(), 10) || 0;
-        return numA - numB;
-    });
+    // ✅ Sort by number at beginning of range or "Over" as high number
+    const getNumericValue = label => {
+        if (label.toLowerCase().includes("over")) return 10000; // puts "Over 200" last
+        const firstPart = label.split('-')[0].trim();
+        const num = parseInt(firstPart, 10);
+        return isNaN(num) ? 0 : num;
+    };
+
+    projectSizeData.sort((a, b) => getNumericValue(a.displayName) - getNumericValue(b.displayName));
 
     if (projectSizeData.length === 0) {
         container.innerHTML = '<p>No project sizes available</p>';
@@ -708,7 +716,6 @@ document.addEventListener("DOMContentLoaded", function () {
     } 
 });
 
-
 document.addEventListener("DOMContentLoaded", function () {
 
     const clientNameContainer = document.getElementById("clientNameContainer");
@@ -748,7 +755,6 @@ document.addEventListener("DOMContentLoaded", function () {
     clientDropdown.addEventListener("change", updateMargin);
 });
 
-
 function updateTotalMarginVariance() {
     let total = 0;
 
@@ -758,8 +764,8 @@ function updateTotalMarginVariance() {
         if (!isNaN(value)) {
             total += value;
         } else {
-            console.warn(`⚠️ Invalid value detected for ${radio.name}: ${radio.value}`);
         }
+        
     });
 
     // Fetch required elements
@@ -812,7 +818,6 @@ function updateTotalMarginVariance() {
                 console.warn(`⚠️ Unrecognized Account Type: ${accountType}`);
         }
     } else {
-        console.warn("⚠️ No client selected. Using default values.");
     }
 
     // **Apply tier-based margin adjustment**
@@ -833,7 +838,6 @@ function updateTotalMarginVariance() {
             maxMargin = total + clientMargin + 2;
             break;
         default:
-            console.warn(`⚠️ Unknown account type: ${accountType}`);
             minMargin = total + clientMargin;
             maxMargin = total + clientMargin;
     }
