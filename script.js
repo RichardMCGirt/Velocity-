@@ -99,6 +99,8 @@ function updateMargin() {
     document.getElementById("totalMarginVariance").value = `Recommended Margin: ${totalMargin.toFixed(2)}%`;
 
     console.log(`   ✅ Total Margin Variance: ${totalMargin.toFixed(2)}%`);
+    updateTotalMarginVariance(); // ← Add this!
+
 }
 
 
