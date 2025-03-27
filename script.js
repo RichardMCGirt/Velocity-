@@ -240,28 +240,27 @@ async function fetchAllClientNames() {
 
 function fetchClientNames() {
     const selectedOffice = document.getElementById('vanirOffice').value;
-    
+
     if (!selectedOffice) {
         console.warn("⚠️ No office selected. Aborting client filtering.");
-        document.getElementById('clientName').innerHTML = '<option>No office selected</option>';
+        populateClientDropdown([]); // ← Clear dropdown
         return;
     }
 
-    // Filter clients based on selected Vanir Office
     const filteredClients = allClients
-    .filter(record => {
-        const division = record.fields.Division || '';
-        return division.toLowerCase().includes(selectedOffice.toLowerCase());
-    })
-            .map(record => ({
+        .filter(record => {
+            const division = record.fields.Division || '';
+            return division.toLowerCase().includes(selectedOffice.toLowerCase());
+        })
+        .map(record => ({
             id: record.id,
             name: record.fields['Client Name'],
             accountType: record.fields['Account Type']
         }));
 
-    console.log(`🔎 Found ${filteredClients.length} matching clients for division '${selectedOffice}'`);
-    populateClientDropdown(filteredClients);
+    populateClientDropdown(filteredClients); // ✅ Always repopulate
 }
+
 
 
 function populateClientDropdown(clients) {
@@ -743,13 +742,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // **Show Client Name dropdown & Fetch Clients when Vanir Office is selected**
     vanirOfficeDropdown.addEventListener("change", function () {
+        const clientDropdown = document.getElementById("clientName");
+    
         if (vanirOfficeDropdown.value) {
-            clientNameContainer.style.display = "block"; // Show the section
-            fetchClientNames(); // ✅ Fetch Client Names based on selected office
+            clientNameContainer.style.display = "block";
+    
+            // Clear existing Tom Select instance before re-fetching
+            if (clientDropdown.tomselect) {
+                clientDropdown.tomselect.destroy();
+            }
+    
+            clientDropdown.innerHTML = '<option value="">Loading...</option>'; // Temporary loading state
+    
+            fetchClientNames(); // ✅ Repopulate based on selected office
         } else {
-            clientNameContainer.style.display = "none"; // Hide if no office is selected
+            clientNameContainer.style.display = "none";
+            
+            // Clear options if no office is selected
+            if (clientDropdown.tomselect) {
+                clientDropdown.tomselect.destroy();
+            }
+            clientDropdown.innerHTML = '<option value="">Select a client</option>';
         }
     });
+    
 
     // **Attach Event Listener to Client Name Dropdown**
     clientDropdown.addEventListener("change", updateMargin);
