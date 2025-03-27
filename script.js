@@ -839,29 +839,26 @@ function updateTotalMarginVariance() {
     let minMargin = total + clientMargin;
     let maxMargin = total + clientMargin;
 
-    const selectedTier = document.querySelector('input[name="tierSelection"]:checked');
-    if (selectedTier) {
-        const tierLabel = selectedTier.nextSibling ? selectedTier.nextSibling.textContent.trim() : "Unknown";
-        console.log(`🎯 Selected Tier: ${tierLabel}`);
-
-        switch (tierLabel) {
-            case "National":
-                minMargin = total + clientMargin - 2;
-                maxMargin = total + clientMargin + 2;
-                break;
-            case "Local Production":
-                minMargin = total + clientMargin - 1;
-                maxMargin = total + clientMargin + 1;
-                break;
-            case "Custom":
-                minMargin = Math.max(0, total + clientMargin - 1);
-                maxMargin = total + clientMargin + 2;
-                console.log(`✅ Custom Tier Adjustments: Min: ${minMargin}% | Max: ${maxMargin}%`);
-                break;
-            default:
-                console.warn(`⚠️ Unknown tier label: ${tierLabel}`);
-        }
+    switch (accountType) {
+        case "National":
+            minMargin = total + clientMargin - 2;
+            maxMargin = total + clientMargin + 2;
+            break;
+        case "Local Production":
+            minMargin = total + clientMargin - 1;
+            maxMargin = total + clientMargin + 1;
+            break;
+        case "Custom":
+            minMargin = Math.max(0, total + clientMargin - 1);
+            maxMargin = total + clientMargin + 2;
+            console.log(`✅ Custom Tier Adjustments: Min: ${minMargin}% | Max: ${maxMargin}%`);
+            break;
+        default:
+            console.warn(`⚠️ Unknown account type: ${accountType}`);
+            minMargin = total + clientMargin;
+            maxMargin = total + clientMargin;
     }
+    
 
     // **Ensure correct Custom min-max if no tier is selected**
     if (accountType === "Custom" && !selectedTier) {
