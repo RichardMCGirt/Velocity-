@@ -859,13 +859,10 @@ function updateTotalMarginVariance() {
             maxMargin = total + clientMargin;
     }
     
+    
+    
 
-    // **Ensure correct Custom min-max if no tier is selected**
-    if (accountType === "Custom" && !selectedTier) {
-        minMargin = Math.max(0, total + clientMargin - 1);
-        maxMargin = total + clientMargin + 2;
-        console.log(`✅ Custom Tier Default Adjustments: Min: ${minMargin}% | Max: ${maxMargin}%`);
-    }
+
 
     // **Final total margin calculation**
     let totalMargin = total + clientMargin;
